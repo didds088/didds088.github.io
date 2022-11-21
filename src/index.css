@@ -67,7 +67,7 @@ code {
 .product-items {
 	line-height: 8px;
 	font-size: 1.1em;
-	text-transform: capitalize;
+	/*text-transform: capitalize;*/
 	padding: 20px;
 }
 .product-items p:nth-child(1){

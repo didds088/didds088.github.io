@@ -20,15 +20,13 @@ $.ajax({
 	let measure = field.measurement;
 	let weight = field.value;
 	let id = field.id;
-	if(response!=="0") 
+	if(response!="0")
 	{       
 		const create = document.createElement("div");
 		create.innerHTML = '<section class="tab"><div class="title"><input class="form-check-input delete-checkbox" type="checkbox" name="option1" value="'+id+'" /></div><div class="product-items"><p id="'+id+'">'+unique+'</p><p>'+name+'</p><p class="text-primary">'+price+'<span> $</span></p><p>'+measure+': <span>'+weight+'</span></p></div></section>';
 		document.getElementById("lists").appendChild(create);
 	}
-	else{
-		alert("error");
-	}
+	
    }); //each. Response
   }// success function
  }); //ajax ends
@@ -75,8 +73,8 @@ const App =()=> {
       <div className="float-start">
 	  <h1 id="heading">Product List</h1></div>
 	  <div className="float-end">
-	  <Link className="link btn btn-danger me-3" to="/Add">Add</Link>
-	  <button type="button" class="btn btn-secondary delete-checkbox" onClick={remove}>Mass Delete</button>
+	  <Link className="link btn btn-danger me-3" to="/Add">ADD</Link>
+	  <button type="button" className="btn btn-secondary" onClick={remove}>MASS DELETE</button>
     </div>
     
     </div>    

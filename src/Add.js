@@ -18,7 +18,6 @@ const Check = () => {
 	},
 	success: function(response) {  
 	$.each(response, function(i, field) { 	
-	let name = field.sku;
 	if(response=="0") 
 	{       
 		document.querySelector("#help").classList.remove("text-danger");
@@ -47,7 +46,7 @@ const ClearSKU = () =>{
 //handles switching between product types
 const Switcher = () => {
 	const product = document.getElementById("productType").value;
-	if (product=="dvd") {
+	if (product=="DVD") {
 		document.getElementById("dvd-grp").style.display="block";
 		document.getElementById("furniture-grp").style.display="none";
 		document.getElementById("book-grp").style.display="none";
@@ -111,7 +110,7 @@ const Insert = (e) => {
 
 const InsertCall = (n) => {
 	let sku2 = document.getElementById("sku").value;
-	if ((n =="dvd") && (sku2!="") && (name!="") && (price!="") && (size!="")) {
+	if ((n =="DVD") && (sku2!="") && (name!="") && (price!="") && (size!="")) {
 	const dataString = {
 				type: n, 
 				sku: sku2.toLowerCase(), 
@@ -157,14 +156,14 @@ const InsertCall = (n) => {
 		<div class="float-start">
 	    <h1 id="heading">Product Add</h1></div>
 	    <div class="float-end">
-		<button type="button" class="btn btn-secondary me-3" >Save</button>
+		<button type="button" class="btn btn-secondary me-3" onClick={()=>InsertCall(document.getElementById("productType").value)}>Save</button>
 	    <Link class="link btn btn-danger" to="/">Cancel</Link> 
         </div>
         
         <div class="clearfix"></div>
 		<hr class="border border-danger"/>
         <div class="rows">
-		<form>
+		<form id="product_form">
   	  <div class="mb-3">
         <label for="sku" class="form-label">SKU</label>
     	<input type="text" class="form-control" id="sku" onChange={Check} />
@@ -182,7 +181,7 @@ const InsertCall = (n) => {
   	  <label for="productType" class="form-label">Type Switcher</label>
   	  <select id="productType" class="form-select" aria-label="Default select example" onChange={Switcher}>
   	  <option selected>Select type</option>
-  	  <option id="DVD" value="dvd">Dvd</option>
+  	  <option id="DVD" value="DVD">DVD</option>
         <option id="Furniture" value="furniture">Furniture</option>
   	  <option id="Book" value="book">Book</option>
 	    </select>
@@ -213,8 +212,7 @@ const InsertCall = (n) => {
     	<label for="weight" class="form-label">Weight (KG) </label>
     	<input type="number" class="form-control" id="weight" value={weight} onChange= {(e) => setweight(e.target.value)} />
   	  </div>
-        <button type="button" class="btn btn-primary" onClick={Clear}>Sub</button>
-        <button type="button" class="btn btn-primary" onClick={()=>InsertCall(document.getElementById("productType").value)}>Submit</button>
+        
 		</form></div>
 		</div>
 	</> 
