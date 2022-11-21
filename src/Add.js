@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { useState } from 'react';
 import $ from "jquery";
 
@@ -102,7 +102,8 @@ const Insert = (e) => {
 	success: function(data) {
 	if (data != "error") {   
 		Clear();               
-		alert("added");
+		//alert("added");
+		window.location.href="https://didds088.github.io/"
 		}
 	}
 }); //ajax ends
