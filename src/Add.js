@@ -109,8 +109,10 @@ const Insert = (e) => {
 }); //ajax ends
 }
 
-const InsertCall = (n) => {
+const SubmitForm = (event) => {
+	event.preventDefault();
 	let sku2 = document.getElementById("sku").value;
+	const n = document.getElementById("productType").value;
 	if ((n =="DVD") && (sku2!="") && (name!="") && (price!="") && (size!="")) {
 	const dataString = {
 				type: n, 
@@ -153,18 +155,19 @@ const InsertCall = (n) => {
 
  return (
 	<>
+		<form id="product_form" onSubmit={SubmitForm}>
 		<div class="rows pt-4">
 		<div class="float-start">
 	    <h1 id="heading">Product Add</h1></div>
 	    <div class="float-end">
-		<button type="button" class="btn btn-secondary me-3" onClick={()=>InsertCall(document.getElementById("productType").value)}>Save</button>
+		<button type="submit" class="btn btn-primary me-3">Save</button>
 	    <Link class="link btn btn-danger" to="/">Cancel</Link> 
         </div>
         
         <div class="clearfix"></div>
 		<hr class="border border-danger"/>
         <div class="rows">
-		<form id="product_form">
+		
   	  <div class="mb-3">
         <label for="sku" class="form-label">SKU</label>
     	<input type="text" class="form-control" id="sku" onChange={Check} />
@@ -214,8 +217,8 @@ const InsertCall = (n) => {
     	<input type="number" class="form-control" id="weight" value={weight} onChange= {(e) => setweight(e.target.value)} />
   	  </div>
         
-		</form></div>
 		</div>
+		</div></form>
 	</> 
 )}
 
