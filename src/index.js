@@ -4,17 +4,23 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
-import { BrowserRouter, Routes, Route} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import App from './App';
 import Add from './Add';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+/*const doSomething = (arg1, component) => {
+ 
+console.log(arg1);
+  return component;
+};     element={doSomething("string", <Add />)} */
 root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
           <Route index element={<App />} />
-          <Route path="/Add" element={<Add />} />
+          <Route  path="/Add" element={<Add />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

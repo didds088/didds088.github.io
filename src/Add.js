@@ -78,7 +78,9 @@ const [ height, setheight] = useState("");
 const [ width, setwidth] = useState("");
 const [ length, setlength] = useState("");
 const [ weight, setweight] = useState("");
+const navigate = useNavigate();
 
+  
 const Clear = () => {
 	document.getElementById("sku").value="";
 	setname("");
@@ -101,9 +103,10 @@ const Insert = (e) => {
 	},
 	success: function(data) {
 	if (data != "error") {   
-		Clear();               
+		Clear();       
+		navigate(-1);        
 		//alert("added");
-		window.location.href="https://didds088.github.io/"
+		//window.location.href="https://didds088.github.io/"
 		}
 	}
 }); //ajax ends

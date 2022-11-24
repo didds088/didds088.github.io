@@ -1,7 +1,10 @@
 import {Link} from "react-router-dom";
 import $ from "jquery";
+ 
+const App =()=> {
 
 //load database 
+function Load() {
 $.ajax({
 	type: "POST",
 	url: "https://teakings.000webhostapp.com/viewTAB.php",                  
@@ -30,7 +33,9 @@ $.ajax({
    }); //each. Response
   }// success function
  }); //ajax ends
- 
+}
+
+window.onload= Load(); //load database
  // mass delete button 
 const remove = () => {
 	let selected = [];
@@ -64,9 +69,7 @@ deleting += $.ajax({
   
 }//deleted function ends
 }//remove ends
- 
- 
-const App =()=> {
+
   return (
       <>
       <div className="rows pt-4">
