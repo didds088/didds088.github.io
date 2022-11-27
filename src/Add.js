@@ -46,17 +46,17 @@ const ClearSKU = () =>{
 //handles switching between product types
 const Switcher = () => {
 	const product = document.getElementById("productType").value;
-	if (product=="DVD") {
+	if (product==="DVD") {
 		document.getElementById("dvd-grp").style.display="block";
 		document.getElementById("furniture-grp").style.display="none";
 		document.getElementById("book-grp").style.display="none";
 		}
-	else if (product=="furniture") {
+	else if (product==="furniture") {
 		document.getElementById("furniture-grp").style.display="block";
 		document.getElementById("dvd-grp").style.display="none";
 		document.getElementById("book-grp").style.display="none";
 		}
-	else if (product=="book") {
+	else if (product==="book") {
 		document.getElementById("book-grp").style.display="block";
 		document.getElementById("furniture-grp").style.display="none";
 		document.getElementById("dvd-grp").style.display="none";
@@ -102,7 +102,7 @@ const Insert = (e) => {
 	success: function(data) {
 	if (data != "error") {   
 		Clear();       
-		navigate(-1);        
+		navigate("/");        
 		//alert("added");
 		//window.location.href="https://didds088.github.io/"
 		}
@@ -114,34 +114,34 @@ const SubmitForm = (event) => {
 	event.preventDefault();
 	let sku2 = document.getElementById("sku").value;
 	const n = document.getElementById("productType").value;
-	if ((n =="DVD") && (sku2!="") && (name!="") && (price!="") && (size!="")) {
+	if ((n ==="DVD") && (sku2!=="") && (name!=="") && (price!=="") && (size!=="")) {
 	const dataString = {
 				type: n, 
 				sku: sku2.toLowerCase(), 
-				name: name.toLowerCase(), 
+				name: name, 
 				price: price, 
 				value: size+"mb", 
 				measurement: "size" 
 			}
 		Insert(dataString);
 	}
-	else if ((n =="furniture") && (sku2!="") && (name!="") && (price!="") && (height!="") && (width!="") && (length!="")) {
+	else if ((n ==="furniture") && (sku2!=="") && (name!=="") && (price!=="") && (height!=="") && (width!=="") && (length!=="")) {
 		let dimension = height + "x" + width + "x" + length;
 		const dataString = {
 				type: n, 
 				sku: sku2.toLowerCase(), 
-				name: name.toLowerCase(), 
+				name: name, 
 				price: price, 
 				value: dimension, 
 				measurement: "Dimension" 
 			}
 		Insert(dataString);
 	}
-	else if ((n =="book") && (sku2!="") && (name!="") && (price!="") && (weight!="")) {
+	else if ((n ==="book") && (sku2!=="") && (name!=="") && (price!=="") && (weight!=="")) {
 		const dataString = {
 				type: n, 
 				sku: sku2.toLowerCase(), 
-				name: name.toLowerCase(), 
+				name: name, 
 				price: price, 
 				value: weight+"kg", 
 				measurement: "weight" 

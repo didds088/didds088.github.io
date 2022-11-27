@@ -1,7 +1,5 @@
 import {Link} from "react-router-dom";
-import $ from "jquery";
- 
-
+import $ from "jquery"; 
 
 //load database 
 function Load() {
@@ -17,7 +15,6 @@ $.ajax({
 	success: function(response) {  
 	$.each(response, function(i, field) { 	
 	let name = field.name;
-	let type = field.type;
 	let unique = field.sku;
 	let price = field.price;
 	let measure = field.measurement;
@@ -34,9 +31,7 @@ $.ajax({
   }// success function
  }); //ajax ends
 }
-
  //load database
-
 
 const App =()=> {
 	Load();
@@ -65,6 +60,7 @@ deleting += $.ajax({
 	beforeSend: function() {
 	},
 	success: function(data) {
+	
 	if (data != "error") {                   
 		window.location.reload();
 		}
