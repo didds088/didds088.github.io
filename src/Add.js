@@ -68,8 +68,6 @@ const Switcher = () => {
 		}
 }
 
-
-
 const Add = () => {
 const [ name, setname] = useState("");
 const [ price, setprice] = useState("");

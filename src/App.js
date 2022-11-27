@@ -1,7 +1,7 @@
 import {Link} from "react-router-dom";
 import $ from "jquery";
  
-const App =()=> {
+
 
 //load database 
 function Load() {
@@ -35,7 +35,11 @@ $.ajax({
  }); //ajax ends
 }
 
-window.onload= Load(); //load database
+ //load database
+
+
+const App =()=> {
+	Load();
  // mass delete button 
 const remove = () => {
 	let selected = [];
@@ -72,6 +76,7 @@ deleting += $.ajax({
 
   return (
       <>
+      
       <div className="rows pt-4">
       <div className="float-start">
 	  <h1 id="heading">Product List</h1></div>
