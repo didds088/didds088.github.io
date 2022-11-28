@@ -1,7 +1,7 @@
 import {Link, useNavigate} from "react-router-dom";
 import { useState } from 'react';
 import $ from "jquery";
-
+import swal from 'sweetalert';
 
 const Check = () => {
 	let unique = document.getElementById("sku").value;
@@ -68,6 +68,7 @@ const Switcher = () => {
 		}
 }
 
+// page function 
 const Add = () => {
 const [ name, setname] = useState("");
 const [ price, setprice] = useState("");
@@ -149,7 +150,7 @@ const SubmitForm = (event) => {
 		Insert(dataString);
 	}
 	else {
-		alert("error");
+		swal ( "Oops" ,  "Please, submit required data!" ,  "error" )
 	}
 }
 
@@ -195,10 +196,11 @@ const SubmitForm = (event) => {
 		<div id="dvd-grp" class="mb-3">
         <label for="size" class="form-label">Size (MB) </label>
     	<input type="number" class="form-control" id="size" value={size} onChange= {(e) => setsize(e.target.value)} />
-    	<div id="sizehelp" class="form-text"></div>
+    	<div id="sizehelp" class="form-text">Please, provide size</div>
   	  </div>
   		
   	  <div id="furniture-grp">
+        <div class="form-text">Please, provide dimensions</div>
   	  <div class="mb-3">
     	<label for="height" class="form-label">Height (CM)</label>
     	<input type="number" class="form-control" id="height" value={height} onChange= {(e) => setheight(e.target.value)} />
@@ -216,10 +218,12 @@ const SubmitForm = (event) => {
   	  <div id="book-grp" class="mb-3">
     	<label for="weight" class="form-label">Weight (KG) </label>
     	<input type="number" class="form-control" id="weight" value={weight} onChange= {(e) => setweight(e.target.value)} />
+    	<div class="form-text">Please, provide weight</div>
   	  </div>
         
 		</div>
 		</div></form>
+		
 	</> 
 )}
 

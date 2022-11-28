@@ -7,7 +7,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 import { BrowserRouter, Routes, Route} from "react-router-dom";
 import App from './App';
 import Add from './Add';
-
+ 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 /*const doSomething = (arg1, component) => {
