@@ -34,6 +34,7 @@ $.ajax({
  //load database
 
 const App =()=> {
+
 	Load();
  // mass delete button 
 const remove = () => {
