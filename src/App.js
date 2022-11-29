@@ -72,8 +72,7 @@ deleting += $.ajax({
 }//remove ends
 
   return (
-      <>
-      
+      <>     
       <div className="rows pt-4">
       <div className="float-start">
 	  <h1 id="heading">Product List</h1></div>

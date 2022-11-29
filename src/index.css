@@ -132,24 +132,20 @@ input[type=checkbox]
 	clear: both;
 	margin: -60px auto;
 }
+
 /*****Desktop view only*****/
 @media (min-width: 992px) {
 	.tab{
-	width: 24.3%;
+	width: 32.3%;
   }
   #heading {
 	font-size: 3vw;
 }
   .rows{
- 	width: 90%;
+ 	width: 85%;
  	margin: 0 auto;
 }
-.footer {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	left: 0;
-}
+
 }
 
 /*****Tablet view only*****/
@@ -164,12 +160,7 @@ input[type=checkbox]
  	width: 90%;
  	margin: 0 auto;
 }
-.footer {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	left: 0;
-}
+
 form{
 	width: 90%;
 	margin:0 auto;
