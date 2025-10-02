@@ -1,1 +1,1260 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Scandiweb Junior developer task"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="manifest" href="/manifest.json"/><title>Scandiweb</title><script defer="defer" src="/static/js/main.7104a9ab.js"></script><link href="/static/css/main.948175fd.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BP Tracker Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .ios-card {
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        .tab-active {
+            color: #007AFF;
+            border-bottom: 2px solid #007AFF;
+        }
+        .status-good { background-color: #34C759; color: white; }
+        .status-elevated { background-color: #FFCC00; color: black; }
+        .status-high { background-color: #FF3B30; color: white; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .insight-positive { color: #34C759; }
+        .insight-warning { color: #FF9500; }
+        .insight-critical { color: #FF3B30; }
+        
+        /* Horizontal scroll styling */
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            padding: 8px 0;
+            gap: 12px;
+        }
+        .horizontal-scroll::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+        .reading-card {
+            min-width: 160px;
+            flex-shrink: 0;
+        }
+        
+        /* Date group styling */
+        .date-group {
+            margin-bottom: 24px;
+        }
+        .date-header {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #374151;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20">
+    <!-- Header -->
+    <header class="bg-white py-4 px-4 sticky top-0 z-10 shadow-sm">
+        <h1 class="text-xl font-semibold text-center">Blood Pressure Tracker Pro</h1>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b bg-white sticky top-14 z-10 overflow-x-auto">
+        <button id="tab-add" class="flex-1 py-3 text-center font-medium tab-active transition-colors min-w-0 px-2">
+            <i class="fas fa-plus-circle mr-1"></i> Add
+        </button>
+        <button id="tab-history" class="flex-1 py-3 text-center font-medium text-gray-500 transition-colors min-w-0 px-2">
+            <i class="fas fa-history mr-1"></i> History
+        </button>
+        <button id="tab-stats" class="flex-1 py-3 text-center font-medium text-gray-500 transition-colors min-w-0 px-2">
+            <i class="fas fa-chart-bar mr-1"></i> Stats
+        </button>
+        <button id="tab-settings" class="flex-1 py-3 text-center font-medium text-gray-500 transition-colors min-w-0 px-2">
+            <i class="fas fa-cog mr-1"></i> Settings
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden transition-opacity"></div>
+
+    <!-- Tab 1: Add New Reading -->
+    <div id="add-tab" class="p-4 fade-in">
+        <div class="ios-card bg-white p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">New Blood Pressure Reading</h2>
+            
+            <form id="bp-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Systolic (mm Hg)</label>
+                        <input type="number" id="systolic" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="120" min="50" max="300" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Diastolic (mm Hg)</label>
+                        <input type="number" id="diastolic" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="80" min="30" max="200" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pulse (BPM)</label>
+                        <input type="number" id="pulse" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="72" min="30" max="200" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                        <input type="text" id="notes" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="After breakfast, feeling stressed...">
+                    </div>
+                </div>
+                
+                <div class="mt-6 bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-2">Current Reading Status:</h3>
+                    <div id="status-preview" class="text-lg font-semibold">Enter values to see status</div>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-lg mt-6 transition-colors">
+                    <i class="fas fa-save mr-2"></i> Save Reading
+                </button>
+            </form>
+        </div>
+        
+        <div class="ios-card bg-white p-6">
+            <h2 class="text-lg font-semibold mb-4">Blood Pressure Guidelines</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="status-good px-3 py-1 rounded-full text-xs font-medium mr-3">Good</span>
+                    <span>Systolic &lt; 120 and Diastolic &lt; 80</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="status-elevated px-3 py-1 rounded-full text-xs font-medium mr-3">Elevated</span>
+                    <span>Systolic 120-129 and Diastolic &lt; 80</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="status-high px-3 py-1 rounded-full text-xs font-medium mr-3">High</span>
+                    <span>Systolic ≥ 130 or Diastolic ≥ 80</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: History -->
+    <div id="history-tab" class="hidden p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Reading History</h2>
+            <div class="flex space-x-2">
+                <button id="toggle-view" class="text-blue-500 text-sm font-medium flex items-center">
+                    <i class="fas fa-list mr-1"></i> List View
+                </button>
+                <button id="export-data" class="text-blue-500 text-sm font-medium flex items-center">
+                    <i class="fas fa-file-export mr-1"></i> Export
+                </button>
+                <button id="clear-history" class="text-red-500 text-sm font-medium flex items-center">
+                    <i class="fas fa-trash-alt mr-1"></i> Clear
+                </button>
+            </div>
+        </div>
+        
+        <!-- Horizontal View -->
+        <div id="horizontal-history">
+            <!-- Date-grouped horizontal sections will be dynamically generated here -->
+        </div>
+        
+        <!-- List View -->
+        <div id="list-history" class="hidden">
+            <div id="history-container">
+                <!-- History content will be dynamically generated here -->
+            </div>
+        </div>
+        
+        <div id="empty-state" class="text-center py-12">
+            <i class="fas fa-heartbeat text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500">No blood pressure readings yet.</p>
+            <p class="text-gray-400 text-sm mt-1">Add your first reading to get started.</p>
+        </div>
+    </div>
+
+    <!-- Tab 3: Statistics -->
+    <div id="stats-tab" class="hidden p-4">
+        <div class="ios-card bg-white p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Blood Pressure Trends</h2>
+            <div class="h-64">
+                <canvas id="bp-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="ios-card bg-white p-4">
+                <h3 class="text-sm font-medium text-gray-500 mb-1">7-Day Average</h3>
+                <div id="avg-7day" class="text-xl font-semibold">--/--</div>
+                <div id="avg-7day-pulse" class="text-sm text-gray-500">-- BPM</div>
+            </div>
+            <div class="ios-card bg-white p-4">
+                <h3 class="text-sm font-medium text-gray-500 mb-1">30-Day Average</h3>
+                <div id="avg-30day" class="text-xl font-semibold">--/--</div>
+                <div id="avg-30day-pulse" class="text-sm text-gray-500">-- BPM</div>
+            </div>
+        </div>
+        
+        <div class="ios-card bg-white p-6">
+            <h2 class="text-lg font-semibold mb-4">Health Insights</h2>
+            <div id="health-insights">
+                <!-- Insights will be dynamically generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Settings -->
+    <div id="settings-tab" class="hidden p-4">
+        <div class="ios-card bg-white p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Data Management</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <h3 class="font-medium mb-2">Export Data</h3>
+                    <p class="text-sm text-gray-600 mb-3">Download your blood pressure data as a CSV file for backup or analysis.</p>
+                    <button id="export-csv" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition-colors">
+                        <i class="fas fa-file-csv mr-2"></i> Export as CSV
+                    </button>
+                </div>
+                
+                <div class="pt-4 border-t">
+                    <h3 class="font-medium mb-2">Import Data</h3>
+                    <p class="text-sm text-gray-600 mb-3">Import blood pressure data from a CSV file.</p>
+                    <input type="file" id="import-file" class="hidden" accept=".csv">
+                    <button id="import-csv" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 rounded-lg transition-colors">
+                        <i class="fas fa-file-import mr-2"></i> Import from CSV
+                    </button>
+                </div>
+                
+                <div class="pt-4 border-t">
+                    <h3 class="font-medium mb-2">Backup Data</h3>
+                    <p class="text-sm text-gray-600 mb-3">Create a backup of your data that you can restore later.</p>
+                    <div class="flex space-x-2">
+                        <button id="backup-data" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 rounded-lg transition-colors">
+                            <i class="fas fa-save mr-2"></i> Backup
+                        </button>
+                        <button id="restore-data" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 rounded-lg transition-colors">
+                            <i class="fas fa-undo mr-2"></i> Restore
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ios-card bg-white p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Reminders</h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium">Daily Reminder</h3>
+                        <p class="text-sm text-gray-600">Get reminded to log your blood pressure</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="daily-reminder" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+                <div id="reminder-time-container" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reminder Time</label>
+                    <input type="time" id="reminder-time" class="w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+            </div>
+        </div>
+        
+        <div class="ios-card bg-white p-6">
+            <h2 class="text-lg font-semibold mb-4">App Information</h2>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Version</span>
+                    <span>2.0.0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Readings Stored</span>
+                    <span id="readings-count">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Last Updated</span>
+                    <span id="last-updated">Never</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear History Confirmation Modal -->
+    <div id="clear-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="ios-card bg-white mx-4 p-6 w-full max-w-sm">
+            <h3 class="text-lg font-semibold mb-2">Clear All History?</h3>
+            <p class="text-gray-600 mb-6">This action cannot be undone. All your blood pressure readings will be permanently deleted.</p>
+            <div class="flex space-x-3">
+                <button id="cancel-clear" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
+                <button id="confirm-clear" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-medium">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup/Restore Modal -->
+    <div id="backup-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="ios-card bg-white mx-4 p-6 w-full max-w-sm">
+            <h3 class="text-lg font-semibold mb-2" id="backup-modal-title">Backup Data</h3>
+            <p class="text-gray-600 mb-4" id="backup-modal-text">Your data will be saved to your device.</p>
+            <div class="mb-4 hidden" id="backup-textarea-container">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Backup Data</label>
+                <textarea id="backup-data-text" rows="4" class="w-full p-2 border border-gray-300 rounded-lg" readonly></textarea>
+            </div>
+            <div class="flex space-x-3">
+                <button id="cancel-backup" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
+                <button id="confirm-backup" class="flex-1 py-2 bg-blue-500 text-white rounded-lg font-medium">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const tabAdd = document.getElementById('tab-add');
+        const tabHistory = document.getElementById('tab-history');
+        const tabStats = document.getElementById('tab-stats');
+        const tabSettings = document.getElementById('tab-settings');
+        const addTab = document.getElementById('add-tab');
+        const historyTab = document.getElementById('history-tab');
+        const statsTab = document.getElementById('stats-tab');
+        const settingsTab = document.getElementById('settings-tab');
+        const bpForm = document.getElementById('bp-form');
+        const systolicInput = document.getElementById('systolic');
+        const diastolicInput = document.getElementById('diastolic');
+        const pulseInput = document.getElementById('pulse');
+        const notesInput = document.getElementById('notes');
+        const statusPreview = document.getElementById('status-preview');
+        const historyContainer = document.getElementById('history-container');
+        const horizontalHistory = document.getElementById('horizontal-history');
+        const listHistory = document.getElementById('list-history');
+        const emptyState = document.getElementById('empty-state');
+        const clearHistoryBtn = document.getElementById('clear-history');
+        const exportDataBtn = document.getElementById('export-data');
+        const toggleViewBtn = document.getElementById('toggle-view');
+        const clearModal = document.getElementById('clear-modal');
+        const cancelClearBtn = document.getElementById('cancel-clear');
+        const confirmClearBtn = document.getElementById('confirm-clear');
+        const toast = document.getElementById('toast');
+        const bpChartCanvas = document.getElementById('bp-chart');
+        const avg7Day = document.getElementById('avg-7day');
+        const avg7DayPulse = document.getElementById('avg-7day-pulse');
+        const avg30Day = document.getElementById('avg-30day');
+        const avg30DayPulse = document.getElementById('avg-30day-pulse');
+        const healthInsights = document.getElementById('health-insights');
+        const exportCsvBtn = document.getElementById('export-csv');
+        const importCsvBtn = document.getElementById('import-csv');
+        const importFile = document.getElementById('import-file');
+        const backupDataBtn = document.getElementById('backup-data');
+        const restoreDataBtn = document.getElementById('restore-data');
+        const backupModal = document.getElementById('backup-modal');
+        const backupModalTitle = document.getElementById('backup-modal-title');
+        const backupModalText = document.getElementById('backup-modal-text');
+        const backupTextareaContainer = document.getElementById('backup-textarea-container');
+        const backupDataText = document.getElementById('backup-data-text');
+        const cancelBackupBtn = document.getElementById('cancel-backup');
+        const confirmBackupBtn = document.getElementById('confirm-backup');
+        const dailyReminder = document.getElementById('daily-reminder');
+        const reminderTimeContainer = document.getElementById('reminder-time-container');
+        const reminderTime = document.getElementById('reminder-time');
+        const readingsCount = document.getElementById('readings-count');
+        const lastUpdated = document.getElementById('last-updated');
+
+        let bpChart = null;
+        let isListView = false;
+
+        // Tab Navigation
+        tabAdd.addEventListener('click', () => switchTab('add'));
+        tabHistory.addEventListener('click', () => switchTab('history'));
+        tabStats.addEventListener('click', () => switchTab('stats'));
+        tabSettings.addEventListener('click', () => switchTab('settings'));
+
+        // Toggle View
+        toggleViewBtn.addEventListener('click', () => {
+            isListView = !isListView;
+            toggleViewBtn.innerHTML = isListView ? 
+                '<i class="fas fa-th-large mr-1"></i> Card View' : 
+                '<i class="fas fa-list mr-1"></i> List View';
+            renderHistory();
+        });
+
+        function switchTab(tab) {
+            // Hide all tabs
+            addTab.classList.add('hidden');
+            historyTab.classList.add('hidden');
+            statsTab.classList.add('hidden');
+            settingsTab.classList.add('hidden');
+            
+            // Remove active state from all tabs
+            tabAdd.classList.remove('tab-active', 'text-blue-500');
+            tabHistory.classList.remove('tab-active', 'text-blue-500');
+            tabStats.classList.remove('tab-active', 'text-blue-500');
+            tabSettings.classList.remove('tab-active', 'text-blue-500');
+            tabAdd.classList.add('text-gray-500');
+            tabHistory.classList.add('text-gray-500');
+            tabStats.classList.add('text-gray-500');
+            tabSettings.classList.add('text-gray-500');
+            
+            // Show selected tab and set active state
+            switch(tab) {
+                case 'add':
+                    addTab.classList.remove('hidden');
+                    tabAdd.classList.add('tab-active', 'text-blue-500');
+                    tabAdd.classList.remove('text-gray-500');
+                    break;
+                case 'history':
+                    historyTab.classList.remove('hidden');
+                    tabHistory.classList.add('tab-active', 'text-blue-500');
+                    tabHistory.classList.remove('text-gray-500');
+                    renderHistory();
+                    break;
+                case 'stats':
+                    statsTab.classList.remove('hidden');
+                    tabStats.classList.add('tab-active', 'text-blue-500');
+                    tabStats.classList.remove('text-gray-500');
+                    renderStatistics();
+                    break;
+                case 'settings':
+                    settingsTab.classList.remove('hidden');
+                    tabSettings.classList.add('tab-active', 'text-blue-500');
+                    tabSettings.classList.remove('text-gray-500');
+                    updateSettingsInfo();
+                    break;
+            }
+        }
+
+        // Blood Pressure Evaluation
+        function evaluateBP(systolic, diastolic) {
+            if (systolic <= 120 && diastolic <= 80) {
+                return { status: 'Good', class: 'status-good' };
+            } else if (systolic > 120 && systolic <= 129 && diastolic < 990) {
+                return { status: 'Elevated', class: 'status-elevated' };
+            } else if (systolic >= 130 || diastolic >= 90) {
+                return { status: 'High', class: 'status-high' };
+            }
+        }
+
+        // Update status preview in real-time
+        systolicInput.addEventListener('input', updateStatusPreview);
+        diastolicInput.addEventListener('input', updateStatusPreview);
+
+        function updateStatusPreview() {
+            const systolic = parseInt(systolicInput.value) || 0;
+            const diastolic = parseInt(diastolicInput.value) || 0;
+            
+            if (systolic > 0 && diastolic > 0) {
+                const evaluation = evaluateBP(systolic, diastolic);
+                statusPreview.innerHTML = `<span class="${evaluation.class} px-3 py-1 rounded-full">${evaluation.status}</span>`;
+            } else {
+                statusPreview.textContent = 'Enter values to see status';
+            }
+        }
+
+        // Local Storage Management
+        function getReadings() {
+            return JSON.parse(localStorage.getItem('bpReadings')) || [];
+        }
+
+        function saveReadings(readings) {
+            localStorage.setItem('bpReadings', JSON.stringify(readings));
+            localStorage.setItem('bpLastUpdated', new Date().toLocaleString());
+            updateSettingsInfo();
+        }
+
+        // Form Submission
+        bpForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const systolic = parseInt(systolicInput.value);
+            const diastolic = parseInt(diastolicInput.value);
+            const pulse = parseInt(pulseInput.value);
+            const notes = notesInput.value;
+            const timestamp = new Date().toISOString();
+            
+            const evaluation = evaluateBP(systolic, diastolic);
+            
+            const newReading = {
+                id: Date.now(),
+                systolic,
+                diastolic,
+                pulse,
+                notes,
+                timestamp,
+                status: evaluation.status,
+                statusClass: evaluation.class
+            };
+            
+            const readings = getReadings();
+            readings.unshift(newReading);
+            saveReadings(readings);
+            
+            // Reset form
+            bpForm.reset();
+            statusPreview.textContent = 'Enter values to see status';
+            
+            // Show success message
+            showToast('Reading saved successfully!');
+            
+            // Switch to history tab
+            switchTab('history');
+        });
+
+        // Render History
+        function renderHistory() {
+            const readings = getReadings();
+            
+            if (readings.length === 0) {
+                emptyState.classList.remove('hidden');
+                horizontalHistory.classList.add('hidden');
+                listHistory.classList.add('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            if (isListView) {
+                horizontalHistory.classList.add('hidden');
+                listHistory.classList.remove('hidden');
+                renderListHistory(readings);
+            } else {
+                horizontalHistory.classList.remove('hidden');
+                listHistory.classList.add('hidden');
+                renderHorizontalHistory(readings);
+            }
+        }
+
+        // Render Horizontal History (Grouped by Date)
+        function renderHorizontalHistory(readings) {
+            // Group readings by date
+            const groupedReadings = {};
+            readings.forEach(reading => {
+                const date = new Date(reading.timestamp).toDateString();
+                if (!groupedReadings[date]) {
+                    groupedReadings[date] = [];
+                }
+                groupedReadings[date].push(reading);
+            });
+            
+            // Generate HTML for grouped readings
+            let html = '';
+            Object.keys(groupedReadings).forEach(date => {
+                const dayReadings = groupedReadings[date];
+                
+                // Format date display
+                const today = new Date().toDateString();
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                let displayDate = date;
+                
+                if (date === today) {
+                    displayDate = 'Today';
+                } else if (date === yesterday) {
+                    displayDate = 'Yesterday';
+                } else {
+                    displayDate = new Date(date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                }
+                
+                html += `
+                    <div class="date-group">
+                        <h3 class="date-header">${displayDate}</h3>
+                        <div class="horizontal-scroll">
+                `;
+                
+                dayReadings.forEach(reading => {
+                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        hour12: true 
+                    });
+                    
+                    html += `
+                        <div class="reading-card ios-card bg-white p-4">
+                            <div class="text-center">
+                                <div class="flex justify-center items-center mb-2">
+                                    <span class="text-lg font-bold mr-2">${reading.systolic}/${reading.diastolic}</span>
+                                    <span class="${reading.statusClass} px-2 py-0.5 rounded-full text-xs font-medium">${reading.status}</span>
+                                </div>
+                                <div class="text-sm text-gray-500 mb-1">
+                                    <i class="fas fa-heartbeat mr-1"></i> ${reading.pulse} BPM
+                                </div>
+                                <div class="text-xs text-gray-400 mb-2">${time}</div>
+                                ${reading.notes ? `<div class="mt-2 text-xs text-gray-600 truncate">${reading.notes}</div>` : ''}
+                            </div>
+                            <button class="delete-reading text-gray-400 hover:text-red-500 mt-2 mx-auto block" data-id="${reading.id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            horizontalHistory.innerHTML = html;
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-reading').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteReading(id);
+                });
+            });
+        }
+
+        // Render List History
+        function renderListHistory(readings) {
+            // Group readings by date
+            const groupedReadings = {};
+            readings.forEach(reading => {
+                const date = new Date(reading.timestamp).toDateString();
+                if (!groupedReadings[date]) {
+                    groupedReadings[date] = [];
+                }
+                groupedReadings[date].push(reading);
+            });
+            
+            // Generate HTML for grouped readings
+            let html = '';
+            Object.keys(groupedReadings).forEach(date => {
+                const dayReadings = groupedReadings[date];
+                
+                // Format date display
+                const today = new Date().toDateString();
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                let displayDate = date;
+                
+                if (date === today) {
+                    displayDate = 'Today';
+                } else if (date === yesterday) {
+                    displayDate = 'Yesterday';
+                } else {
+                    displayDate = new Date(date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                }
+                
+                html += `
+                    <div class="mb-6">
+                        <h3 class="text-md font-semibold text-gray-700 mb-3 px-2">${displayDate}</h3>
+                        <div class="space-y-3">
+                `;
+                
+                dayReadings.forEach(reading => {
+                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        hour12: true 
+                    });
+                    
+                    html += `
+                        <div class="ios-card bg-white p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="flex items-center mb-1">
+                                        <span class="text-xl font-semibold mr-2">${reading.systolic}/${reading.diastolic}</span>
+                                        <span class="${reading.statusClass} px-2 py-0.5 rounded-full text-xs font-medium">${reading.status}</span>
+                                    </div>
+                                    <div class="flex text-sm text-gray-500">
+                                        <span class="mr-3"><i class="fas fa-heartbeat mr-1"></i> ${reading.pulse} BPM</span>
+                                        <span><i class="far fa-clock mr-1"></i> ${time}</span>
+                                    </div>
+                                    ${reading.notes ? `<div class="mt-2 text-sm text-gray-600">${reading.notes}</div>` : ''}
+                                </div>
+                                <button class="delete-reading text-gray-400 hover:text-red-500" data-id="${reading.id}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyContainer.innerHTML = html;
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-reading').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteReading(id);
+                });
+            });
+        }
+
+        // Delete Single Reading
+        function deleteReading(id) {
+            const readings = getReadings();
+            const filteredReadings = readings.filter(reading => reading.id !== id);
+            saveReadings(filteredReadings);
+            renderHistory();
+            showToast('Reading deleted');
+        }
+
+        // Clear History
+        clearHistoryBtn.addEventListener('click', () => {
+            clearModal.classList.remove('hidden');
+        });
+
+        cancelClearBtn.addEventListener('click', () => {
+            clearModal.classList.add('hidden');
+        });
+
+        confirmClearBtn.addEventListener('click', () => {
+            saveReadings([]);
+            renderHistory();
+            clearModal.classList.add('hidden');
+            showToast('All history cleared');
+        });
+
+        // Render Statistics
+        function renderStatistics() {
+            const readings = getReadings();
+            
+            if (readings.length === 0) {
+                healthInsights.innerHTML = `
+                    <p class="text-gray-500">No data available. Add some readings to see statistics and insights.</p>
+                `;
+                avg7Day.textContent = '--/--';
+                avg7DayPulse.textContent = '-- BPM';
+                avg30Day.textContent = '--/--';
+                avg30DayPulse.textContent = '-- BPM';
+                
+                if (bpChart) {
+                    bpChart.destroy();
+                }
+                return;
+            }
+            
+            // Calculate averages
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            const readings7Days = readings.filter(r => new Date(r.timestamp) >= sevenDaysAgo);
+            const readings30Days = readings.filter(r => new Date(r.timestamp) >= thirtyDaysAgo);
+            
+            // Calculate 7-day averages
+            if (readings7Days.length > 0) {
+                const avgSystolic7 = Math.round(readings7Days.reduce((sum, r) => sum + r.systolic, 0) / readings7Days.length);
+                const avgDiastolic7 = Math.round(readings7Days.reduce((sum, r) => sum + r.diastolic, 0) / readings7Days.length);
+                const avgPulse7 = Math.round(readings7Days.reduce((sum, r) => sum + r.pulse, 0) / readings7Days.length);
+                
+                avg7Day.textContent = `${avgSystolic7}/${avgDiastolic7}`;
+                avg7DayPulse.textContent = `${avgPulse7} BPM`;
+            } else {
+                avg7Day.textContent = '--/--';
+                avg7DayPulse.textContent = '-- BPM';
+            }
+            
+            // Calculate 30-day averages
+            if (readings30Days.length > 0) {
+                const avgSystolic30 = Math.round(readings30Days.reduce((sum, r) => sum + r.systolic, 0) / readings30Days.length);
+                const avgDiastolic30 = Math.round(readings30Days.reduce((sum, r) => sum + r.diastolic, 0) / readings30Days.length);
+                const avgPulse30 = Math.round(readings30Days.reduce((sum, r) => sum + r.pulse, 0) / readings30Days.length);
+                
+                avg30Day.textContent = `${avgSystolic30}/${avgDiastolic30}`;
+                avg30DayPulse.textContent = `${avgPulse30} BPM`;
+            } else {
+                avg30Day.textContent = '--/--';
+                avg30DayPulse.textContent = '-- BPM';
+            }
+            
+            // Generate health insights
+            generateHealthInsights(readings);
+            
+            // Create chart
+            createBPChart(readings);
+        }
+
+        // Create Blood Pressure Chart
+        function createBPChart(readings) {
+            // Use last 14 readings or all if less than 14
+            const chartReadings = readings.slice(0, 14).reverse();
+            
+            const labels = chartReadings.map(r => {
+                const date = new Date(r.timestamp);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const systolicData = chartReadings.map(r => r.systolic);
+            const diastolicData = chartReadings.map(r => r.diastolic);
+            
+            if (bpChart) {
+                bpChart.destroy();
+            }
+            
+            const ctx = bpChartCanvas.getContext('2d');
+            bpChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Systolic',
+                            data: systolicData,
+                            borderColor: '#FF3B30',
+                            backgroundColor: 'rgba(255, 59, 48, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Diastolic',
+                            data: diastolicData,
+                            borderColor: '#007AFF',
+                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            suggestedMin: 60,
+                            suggestedMax: 180
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate Health Insights
+        function generateHealthInsights(readings) {
+            if (readings.length === 0) return;
+            
+            const recentReadings = readings.slice(0, 7); // Last 7 readings
+            const goodReadings = recentReadings.filter(r => r.status === 'Good').length;
+            const elevatedReadings = recentReadings.filter(r => r.status === 'Elevated').length;
+            const highReadings = recentReadings.filter(r => r.status === 'High').length;
+            
+            let insightsHTML = '';
+            
+            // Overall status insight
+            if (goodReadings >= 5) {
+                insightsHTML += `
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <div>
+                            <p class="font-medium insight-positive">Excellent blood pressure control</p>
+                            <p class="text-sm text-gray-600">Most of your recent readings are in the healthy range.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (highReadings >= 3) {
+                insightsHTML += `
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-2"></i>
+                        <div>
+                            <p class="font-medium insight-critical">Consistently high readings</p>
+                            <p class="text-sm text-gray-600">Consider consulting with a healthcare provider about your blood pressure.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (elevatedReadings >= 3) {
+                insightsHTML += `
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-exclamation-circle text-yellow-500 mt-1 mr-2"></i>
+                        <div>
+                            <p class="font-medium insight-warning">Elevated readings detected</p>
+                            <p class="text-sm text-gray-600">Monitor your blood pressure closely and consider lifestyle changes.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Morning vs Evening insight (if we have enough data with timestamps)
+            const morningReadings = recentReadings.filter(r => {
+                const hour = new Date(r.timestamp).getHours();
+                return hour >= 6 && hour < 12;
+            });
+            
+            const eveningReadings = recentReadings.filter(r => {
+                const hour = new Date(r.timestamp).getHours();
+                return hour >= 18 && hour < 24;
+            });
+            
+            if (morningReadings.length >= 2 && eveningReadings.length >= 2) {
+                const morningAvgSystolic = Math.round(morningReadings.reduce((sum, r) => sum + r.systolic, 0) / morningReadings.length);
+                const eveningAvgSystolic = Math.round(eveningReadings.reduce((sum, r) => sum + r.systolic, 0) / eveningReadings.length);
+                
+                if (morningAvgSystolic > eveningAvgSystolic + 10) {
+                    insightsHTML += `
+                        <div class="flex items-start mb-3">
+                            <i class="fas fa-sun text-yellow-500 mt-1 mr-2"></i>
+                            <div>
+                                <p class="font-medium insight-warning">Higher morning readings</p>
+                                <p class="text-sm text-gray-600">Your blood pressure tends to be higher in the morning. This is common but worth monitoring.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Pulse insight
+            const avgPulse = Math.round(recentReadings.reduce((sum, r) => sum + r.pulse, 0) / recentReadings.length);
+            if (avgPulse > 100) {
+                insightsHTML += `
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-heartbeat text-red-500 mt-1 mr-2"></i>
+                        <div>
+                            <p class="font-medium insight-critical">Elevated pulse rate</p>
+                            <p class="text-sm text-gray-600">Your average pulse is higher than normal. Consider stress reduction techniques.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (avgPulse < 60) {
+                insightsHTML += `
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-heartbeat text-blue-500 mt-1 mr-2"></i>
+                        <div>
+                            <p class="font-medium">Low pulse rate</p>
+                            <p class="text-sm text-gray-600">Your pulse is lower than average, which can be normal for athletes.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // If no specific insights, show general tip
+            if (insightsHTML === '') {
+                insightsHTML = `
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-lightbulb text-blue-500 mt-1 mr-2"></i>
+                        <div>
+                            <p class="font-medium">Keep tracking regularly</p>
+                            <p class="text-sm text-gray-600">Consistent monitoring helps identify patterns and trends in your blood pressure.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            healthInsights.innerHTML = insightsHTML;
+        }
+
+        // Export Data as CSV
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        exportDataBtn.addEventListener('click', exportToCSV);
+
+        function exportToCSV() {
+            const readings = getReadings();
+            if (readings.length === 0) {
+                showToast('No data to export');
+                return;
+            }
+            
+            let csv = 'Date,Time,Systolic,Diastolic,Pulse,Status,Notes\n';
+            
+            readings.forEach(reading => {
+                const date = new Date(reading.timestamp);
+                const dateStr = date.toLocaleDateString();
+                const timeStr = date.toLocaleTimeString();
+                
+                csv += `"${dateStr}","${timeStr}",${reading.systolic},${reading.diastolic},${reading.pulse},"${reading.status}","${reading.notes || ''}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blood-pressure-data-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Data exported successfully');
+        }
+
+        // Import Data from CSV
+        importCsvBtn.addEventListener('click', () => {
+            importFile.click();
+        });
+
+        importFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                importFromCSV(csv);
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            e.target.value = '';
+        });
+
+        function importFromCSV(csvText) {
+            try {
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+                
+                // Validate CSV format
+                const expectedHeaders = ['Date', 'Time', 'Systolic', 'Diastolic', 'Pulse', 'Status', 'Notes'];
+                const isValidFormat = expectedHeaders.every(h => headers.includes(h));
+                
+                if (!isValidFormat) {
+                    showToast('Invalid CSV format');
+                    return;
+                }
+                
+                const newReadings = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+                    
+                    // Skip if not enough values
+                    if (values.length < 6) continue;
+                    
+                    const dateStr = values[0];
+                    const timeStr = values[1];
+                    const systolic = parseInt(values[2]);
+                    const diastolic = parseInt(values[3]);
+                    const pulse = parseInt(values[4]);
+                    const status = values[5];
+                    const notes = values[6] || '';
+                    
+                    // Validate data
+                    if (isNaN(systolic) || isNaN(diastolic) || isNaN(pulse)) continue;
+                    
+                    // Create timestamp
+                    const timestamp = new Date(`${dateStr} ${timeStr}`).toISOString();
+                    if (isNaN(new Date(timestamp).getTime())) continue;
+                    
+                    // Determine status class
+                    let statusClass = '';
+                    if (status === 'Good') statusClass = 'status-good';
+                    else if (status === 'Elevated') statusClass = 'status-elevated';
+                    else if (status === 'High') statusClass = 'status-high';
+                    
+                    newReadings.push({
+                        id: Date.now() + i, // Simple ID generation
+                        systolic,
+                        diastolic,
+                        pulse,
+                        notes,
+                        timestamp,
+                        status,
+                        statusClass
+                    });
+                }
+                
+                if (newReadings.length === 0) {
+                    showToast('No valid data found in CSV');
+                    return;
+                }
+                
+                // Merge with existing data
+                const existingReadings = getReadings();
+                const allReadings = [...newReadings, ...existingReadings];
+                
+                // Sort by timestamp (newest first)
+                allReadings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                saveReadings(allReadings);
+                showToast(`Imported ${newReadings.length} readings successfully`);
+                
+                // Switch to history tab
+                switchTab('history');
+            } catch (error) {
+                console.error('Error importing CSV:', error);
+                showToast('Error importing CSV file');
+            }
+        }
+
+        // Backup Data
+        backupDataBtn.addEventListener('click', () => {
+            const readings = getReadings();
+            if (readings.length === 0) {
+                showToast('No data to backup');
+                return;
+            }
+            
+            const backupData = JSON.stringify(readings);
+            backupDataText.value = backupData;
+            backupTextareaContainer.classList.remove('hidden');
+            backupModalTitle.textContent = 'Backup Data';
+            backupModalText.textContent = 'Copy this backup code to a safe place:';
+            confirmBackupBtn.textContent = 'Copy';
+            backupModal.classList.remove('hidden');
+        });
+
+        // Restore Data
+        restoreDataBtn.addEventListener('click', () => {
+            backupDataText.value = '';
+            backupTextareaContainer.classList.remove('hidden');
+            backupModalTitle.textContent = 'Restore Data';
+            backupModalText.textContent = 'Paste your backup code here:';
+            confirmBackupBtn.textContent = 'Restore';
+            backupModal.classList.remove('hidden');
+        });
+
+        // Confirm Backup/Restore
+        confirmBackupBtn.addEventListener('click', () => {
+            if (confirmBackupBtn.textContent === 'Copy') {
+                // Copy backup data to clipboard
+                backupDataText.select();
+                document.execCommand('copy');
+                showToast('Backup data copied to clipboard');
+                backupModal.classList.add('hidden');
+            } else {
+                // Restore from backup
+                try {
+                    const backupData = backupDataText.value.trim();
+                    if (!backupData) {
+                        showToast('Please enter backup data');
+                        return;
+                    }
+                    
+                    const restoredReadings = JSON.parse(backupData);
+                    
+                    // Validate the data structure
+                    if (!Array.isArray(restoredReadings) || 
+                        !restoredReadings.every(r => 
+                            r.systolic && r.diastolic && r.pulse && r.timestamp)) {
+                        throw new Error('Invalid backup data format');
+                    }
+                    
+                    saveReadings(restoredReadings);
+                    showToast('Data restored successfully');
+                    backupModal.classList.add('hidden');
+                    
+                    // Switch to history tab
+                    switchTab('history');
+                } catch (error) {
+                    console.error('Error restoring data:', error);
+                    showToast('Error restoring from backup');
+                }
+            }
+        });
+
+        cancelBackupBtn.addEventListener('click', () => {
+            backupModal.classList.add('hidden');
+        });
+
+        // Reminder Settings
+        dailyReminder.addEventListener('change', function() {
+            if (this.checked) {
+                reminderTimeContainer.classList.remove('hidden');
+                // Set default reminder time to 8:00 AM if not set
+                if (!reminderTime.value) {
+                    reminderTime.value = '08:00';
+                }
+                saveReminderSettings();
+                showToast('Daily reminder enabled');
+            } else {
+                reminderTimeContainer.classList.add('hidden');
+                saveReminderSettings();
+                showToast('Daily reminder disabled');
+            }
+        });
+
+        reminderTime.addEventListener('change', saveReminderSettings);
+
+        function saveReminderSettings() {
+            const settings = {
+                dailyReminder: dailyReminder.checked,
+                reminderTime: reminderTime.value
+            };
+            localStorage.setItem('bpReminderSettings', JSON.stringify(settings));
+        }
+
+        function loadReminderSettings() {
+            const settings = JSON.parse(localStorage.getItem('bpReminderSettings') || '{}');
+            dailyReminder.checked = settings.dailyReminder || false;
+            reminderTime.value = settings.reminderTime || '08:00';
+            
+            if (dailyReminder.checked) {
+                reminderTimeContainer.classList.remove('hidden');
+            } else {
+                reminderTimeContainer.classList.add('hidden');
+            }
+        }
+
+        // Update Settings Info
+        function updateSettingsInfo() {
+            const readings = getReadings();
+            readingsCount.textContent = readings.length;
+            
+            const lastUpdatedTime = localStorage.getItem('bpLastUpdated');
+            lastUpdated.textContent = lastUpdatedTime || 'Never';
+        }
+
+        // Toast Notification
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('fade-in');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('fade-in');
+            }, 3000);
+        }
+
+        // Check for daily reminder
+        function checkReminder() {
+            const settings = JSON.parse(localStorage.getItem('bpReminderSettings') || '{}');
+            if (settings.dailyReminder) {
+                const now = new Date();
+                const reminderTime = settings.reminderTime.split(':');
+                const reminderHour = parseInt(reminderTime[0]);
+                const reminderMinute = parseInt(reminderTime[1]);
+                
+                // Check if it's time for reminder (within 5 minutes)
+                if (now.getHours() === reminderHour && 
+                    now.getMinutes() >= reminderMinute && 
+                    now.getMinutes() < reminderMinute + 5) {
+                    
+                    // Check if already logged today
+                    const readings = getReadings();
+                    const today = new Date().toDateString();
+                    const todayReadings = readings.filter(r => 
+                        new Date(r.timestamp).toDateString() === today
+                    );
+                    
+                    if (todayReadings.length === 0) {
+                        showToast("Don't forget to log your blood pressure today!");
+                    }
+                }
+            }
+        }
+
+        // Initialize app
+        function initApp() {
+            renderHistory();
+            loadReminderSettings();
+            updateSettingsInfo();
+            
+            // Check for reminder every minute
+            setInterval(checkReminder, 60000);
+        }
+
+        // Start the app
+        initApp();
+    </script>
+</body>
+</html>
