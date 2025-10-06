@@ -430,7 +430,7 @@
         function evaluateBP(systolic, diastolic) {
             if (systolic < 120 && diastolic < 80) {
                 return { status: 'Good', class: 'status-good' };
-            } else if (systolic >= 120 && systolic < 130 && diastolic < 80) {
+            } else if (systolic >= 120 && systolic < 130 && diastolic < 90) {
                 return { status: 'Elevated', class: 'status-elevated' };
             } else {
                 return { status: 'High', class: 'status-high' };
