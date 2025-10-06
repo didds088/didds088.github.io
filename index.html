@@ -426,17 +426,17 @@
         }
 
         // Blood Pressure Evaluation
-                function evaluateBP(systolic, diastolic) {
+function evaluateBP(systolic, diastolic) {
     if (systolic <= 120 && diastolic <= 80) {
         return { status: 'Good', class: 'status-good' };
-    } 
-    else if ((systolic > 120 && systolic < 140) || (diastolic > 80 && diastolic < 90)) {
-        return { status: 'Elevated', class: 'status-elevated' };
-    } 
-    else {
+    } else if (systolic >= 140 || diastolic >= 90) {
         return { status: 'High', class: 'status-high' };
+    } else if ((systolic > 120 && systolic < 140) || (diastolic > 80 && diastolic < 90)) {
+        return { status: 'Elevated', class: 'status-elevated' };
+    } else {
+        return { status: 'Unknown', class: 'status-unknown' };
     }
-}
+}               
 
         // Update status preview in real-time
         systolicInput.addEventListener('input', updateStatusPreview);
