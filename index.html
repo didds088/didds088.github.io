@@ -19,6 +19,7 @@
         .status-good { background-color: #34C759; color: white; }
         .status-elevated { background-color: #FFCC00; color: black; }
         .status-high { background-color: #FF3B30; color: white; }
+        .status-low { background-color: #FF3B30; color: white; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .insight-positive { color: #34C759; }
@@ -426,8 +427,10 @@
         }
 
         // Blood Pressure Evaluation
-function evaluateBP(systolic, diastolic) {
-    if (systolic <= 120 && diastolic <= 80) {
+        function evaluateBP(systolic, diastolic) {
+    if (systolic < 90 || diastolic < 60) {
+        return { status: 'Low', class: 'status-low' };
+    } else if (systolic <= 120 && diastolic <= 80) {
         return { status: 'Good', class: 'status-good' };
     } else if (systolic >= 140 || diastolic >= 90) {
         return { status: 'High', class: 'status-high' };
@@ -436,7 +439,7 @@ function evaluateBP(systolic, diastolic) {
     } else {
         return { status: 'Unknown', class: 'status-unknown' };
     }
-}               
+}
 
         // Update status preview in real-time
         systolicInput.addEventListener('input', updateStatusPreview);
