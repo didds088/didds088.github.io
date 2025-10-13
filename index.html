@@ -663,7 +663,7 @@
                 if (!groupedReadings[date]) {
                     groupedReadings[date] = [];
                 }
-                groupedReadings[date].push(reading);
+                groupedReadings[date].unshift(reading);
             });
             
             // Generate table rows
