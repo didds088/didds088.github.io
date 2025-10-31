@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +20,7 @@
         .status-good { background-color: #34C759; color: white; }
         .status-elevated { background-color: #FFCC00; color: black; }
         .status-high { background-color: #FF3B30; color: white; }
-        .status-low { background-color: #FF3B30; color: white; }
+        .status-low { background-color: #5856d6; color: white; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .insight-positive { color: #34C759; }
@@ -121,6 +122,7 @@
             color: #6b7280;
         }
     </style>
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
     <!-- Header -->
@@ -189,6 +191,10 @@
         <div class="ios-card bg-white p-6">
             <h2 class="text-lg font-semibold mb-4">Blood Pressure Guidelines</h2>
             <div class="space-y-3">
+                 <div class="flex items-center">
+                    <span class="status-low px-3 py-1 rounded-full text-xs font-medium mr-3">Low</span>
+                    <span>Systolic &lt; 90 or Diastolic &lt; 60</span>
+                </div>
                 <div class="flex items-center">
                     <span class="status-good px-3 py-1 rounded-full text-xs font-medium mr-3">Good</span>
                     <span>Systolic &lt; 120 and Diastolic &lt; 80</span>
@@ -212,14 +218,14 @@
             <div class="flex space-x-2 items-center flex-wrap gap-2">
                 <!-- View Toggle Buttons -->
                 <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
-                    <button id="view-card" class="view-btn active" title="Card View">
+                	<button id="view-table" class="view-btn active" title="Table View">
+                        <i class="fas fa-table"></i>
+                    </button>
+                    <button id="view-card" class="view-btn" title="Card View">
                         <i class="fas fa-th-large"></i>
                     </button>
                     <button id="view-list" class="view-btn" title="List View">
                         <i class="fas fa-list"></i>
-                    </button>
-                    <button id="view-table" class="view-btn" title="Table View">
-                        <i class="fas fa-table"></i>
                     </button>
                 </div>
                 
@@ -233,7 +239,7 @@
         </div>
         
         <!-- Card View (Horizontal) -->
-        <div id="horizontal-history">
+        <div id="horizontal-history" class="hidden">
             <!-- Date-grouped horizontal sections will be dynamically generated here -->
         </div>
         
@@ -245,7 +251,7 @@
         </div>
         
         <!-- Table View -->
-        <div id="table-history" class="hidden">
+        <div id="table-history">
             <div class="ios-card bg-white p-4 table-container">
                 <table class="bp-table">
                     <thead>
@@ -253,9 +259,7 @@
                             <th>Date</th>
                             <th>Readings</th>
                             <th>Avg BP</th>
-                           <!-- <th>Avg Pulse</th> -->
                             <th>Status</th>
-                           <!-- <th>Notes</th> -->
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -263,6 +267,13 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        
+        <!-- View More Button -->
+        <div id="view-more-container" class="text-center mt-6 hidden">
+            <button id="view-more-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                <i class="fas fa-chevron-down mr-2"></i> View More
+            </button>
         </div>
         
         <div id="empty-state" class="text-center py-12">
@@ -436,6 +447,8 @@
         const viewCardBtn = document.getElementById('view-card');
         const viewListBtn = document.getElementById('view-list');
         const viewTableBtn = document.getElementById('view-table');
+        const viewMoreContainer = document.getElementById('view-more-container');
+        const viewMoreBtn = document.getElementById('view-more-btn');
         const clearModal = document.getElementById('clear-modal');
         const cancelClearBtn = document.getElementById('cancel-clear');
         const confirmClearBtn = document.getElementById('confirm-clear');
@@ -465,7 +478,8 @@
         const lastUpdated = document.getElementById('last-updated');
 
         let bpChart = null;
-        let currentView = 'card'; // 'card', 'list', or 'table'
+        let currentView = 'table'; // 'card', 'list', or 'table'
+        let showAllReadings = false; // Track if showing all readings or just last 7
 
         // Tab Navigation
         tabAdd.addEventListener('click', () => switchTab('add'));
@@ -478,8 +492,21 @@
         viewListBtn.addEventListener('click', () => switchView('list'));
         viewTableBtn.addEventListener('click', () => switchView('table'));
 
+        // View More Button
+        viewMoreBtn.addEventListener('click', () => {
+            showAllReadings = !showAllReadings;
+            if (showAllReadings) {
+                viewMoreBtn.innerHTML = '<i class="fas fa-chevron-up mr-2"></i> View Less';
+            } else {
+                viewMoreBtn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i> View More';
+            }
+            renderHistory();
+        });
+
         function switchView(view) {
             currentView = view;
+            showAllReadings = false; // Reset to show only last 7 when switching views
+            viewMoreBtn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i> View More';
             
             // Update button states
             viewCardBtn.classList.remove('active');
@@ -525,6 +552,8 @@
                     historyTab.classList.remove('hidden');
                     tabHistory.classList.add('tab-active', 'text-blue-500');
                     tabHistory.classList.remove('text-gray-500');
+                    showAllReadings = false; // Reset when switching to history tab
+                    viewMoreBtn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i> View More';
                     renderHistory();
                     break;
                 case 'stats':
@@ -624,33 +653,44 @@
 
         // Render History
         function renderHistory() {
-            const readings = getReadings();
+            const allReadings = getReadings();
             
-            if (readings.length === 0) {
+            if (allReadings.length === 0) {
                 emptyState.classList.remove('hidden');
                 horizontalHistory.classList.add('hidden');
                 listHistory.classList.add('hidden');
                 tableHistory.classList.add('hidden');
+                viewMoreContainer.classList.add('hidden');
                 return;
             }
             
             emptyState.classList.add('hidden');
             
+            // Determine how many readings to show
+            const readingsToShow = showAllReadings ? allReadings : allReadings.slice(0, 7);
+            
+            // Show/hide "View More" button
+            if (allReadings.length > 7) {
+                viewMoreContainer.classList.remove('hidden');
+            } else {
+                viewMoreContainer.classList.add('hidden');
+            }
+            
             if (currentView === 'card') {
                 horizontalHistory.classList.remove('hidden');
                 listHistory.classList.add('hidden');
                 tableHistory.classList.add('hidden');
-                renderHorizontalHistory(readings);
+                renderHorizontalHistory(readingsToShow);
             } else if (currentView === 'list') {
                 horizontalHistory.classList.add('hidden');
                 listHistory.classList.remove('hidden');
                 tableHistory.classList.add('hidden');
-                renderListHistory(readings);
+                renderListHistory(readingsToShow);
             } else if (currentView === 'table') {
                 horizontalHistory.classList.add('hidden');
                 listHistory.classList.add('hidden');
                 tableHistory.classList.remove('hidden');
-                renderTableHistory(readings);
+                renderTableHistory(readingsToShow);
             }
         }
 
@@ -711,26 +751,10 @@
                             <span class="time-badge">${time}</span>
                             <span class="font-semibold">${reading.systolic}/${reading.diastolic}</span>
                             <span class="text-gray-500 text-xs">❤️ ${reading.pulse}</span>
-                           <!-- <button class="delete-reading-table text-gray-400 hover:text-red-500 ml-1" data-id="${reading.id}" title="Delete">
-                                <i class="fas fa-times text-xs"></i>
-                            </button> -->
                         </div>
                     `;
                 });
                 readingsCell += '</div>';
-                
-                // Collect all notes for the day
-                const dayNotes = dayReadings
-                    .filter(r => r.notes)
-                    .map(r => {
-                        const time = new Date(r.timestamp).toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit',
-                            hour12: true 
-                        });
-                        return `<div class="text-xs mb-1"><span class="text-gray-400">${time}:</span> ${r.notes}</div>`;
-                    })
-                    .join('');
                 
                 html += `
                     <tr>
@@ -740,29 +764,14 @@
                             <div class="font-semibold">${avgSystolic}/${avgDiastolic}</div>
                             <div class="text-xs text-gray-500">${dayReadings.length} reading${dayReadings.length > 1 ? 's' : ''}</div>
                         </td>
-                      <!--  <td>
-                            <div class="font-semibold">${avgPulse} BPM</div>
-                        </td> -->
                         <td>
                             <span class="${avgEvaluation.class} px-2 py-1 rounded-full text-xs font-medium">${avgEvaluation.status}</span>
                         </td>
-                    <!--  <td>
-                            <div class="max-w-xs">${dayNotes || '<span class="text-gray-400 text-xs">No notes</span>'}</div>
-                        </td> -->
                     </tr>
                 `;
             });
             
             tableBody.innerHTML = html;
-            
-            // Add event listeners to delete buttons
-            document.querySelectorAll('.delete-reading-table').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const id = parseInt(this.getAttribute('data-id'));
-                    deleteReading(id);
-                });
-            });
         }
 
         // Render Horizontal History (Grouped by Date)
@@ -1149,27 +1158,29 @@
                 }
             }
             
-            const avgPulse = Math.round(recentReadings.reduce((sum, r) => sum + r.pulse, 0) / recentReadings.length);
-            if (avgPulse > 100) {
-                insightsHTML += `
-                    <div class="flex items-start mb-3">
-                        <i class="fas fa-heartbeat text-red-500 mt-1 mr-2"></i>
-                        <div>
-                            <p class="font-medium insight-critical">Elevated pulse rate</p>
-                            <p class="text-sm text-gray-600">Your average pulse is higher than normal. Consider stress reduction techniques.</p>
+            if (recentReadings.length > 0) {
+                const avgPulse = Math.round(recentReadings.reduce((sum, r) => sum + r.pulse, 0) / recentReadings.length);
+                if (avgPulse > 100) {
+                    insightsHTML += `
+                        <div class="flex items-start mb-3">
+                            <i class="fas fa-heartbeat text-red-500 mt-1 mr-2"></i>
+                            <div>
+                                <p class="font-medium insight-critical">Elevated pulse rate</p>
+                                <p class="text-sm text-gray-600">Your average pulse is higher than normal. Consider stress reduction techniques.</p>
+                            </div>
                         </div>
-                    </div>
-                `;
-            } else if (avgPulse < 60) {
-                insightsHTML += `
-                    <div class="flex items-start mb-3">
-                        <i class="fas fa-heartbeat text-blue-500 mt-1 mr-2"></i>
-                        <div>
-                            <p class="font-medium">Low pulse rate</p>
-                            <p class="text-sm text-gray-600">Your pulse is lower than average, which can be normal for athletes.</p>
+                    `;
+                } else if (avgPulse < 60) {
+                    insightsHTML += `
+                        <div class="flex items-start mb-3">
+                            <i class="fas fa-heartbeat text-blue-500 mt-1 mr-2"></i>
+                            <div>
+                                <p class="font-medium">Low pulse rate</p>
+                                <p class="text-sm text-gray-600">Your pulse is lower than average, which can be normal for athletes.</p>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
             
             if (insightsHTML === '') {
@@ -1275,10 +1286,7 @@
                     const timestamp = new Date(`${dateStr} ${timeStr}`).toISOString();
                     if (isNaN(new Date(timestamp).getTime())) continue;
                     
-                    let statusClass = '';
-                    if (status === 'Good') statusClass = 'status-good';
-                    else if (status === 'Elevated') statusClass = 'status-elevated';
-                    else if (status === 'High') statusClass = 'status-high';
+                    const evaluation = evaluateBP(systolic, diastolic);
                     
                     newReadings.push({
                         id: Date.now() + i,
@@ -1287,8 +1295,8 @@
                         pulse,
                         notes,
                         timestamp,
-                        status,
-                        statusClass
+                        status: evaluation.status,
+                        statusClass: evaluation.class
                     });
                 }
                 
@@ -1437,22 +1445,26 @@
             const settings = JSON.parse(localStorage.getItem('bpReminderSettings') || '{}');
             if (settings.dailyReminder) {
                 const now = new Date();
-                const reminderTime = settings.reminderTime.split(':');
-                const reminderHour = parseInt(reminderTime[0]);
-                const reminderMinute = parseInt(reminderTime[1]);
+                const reminderTimeParts = settings.reminderTime.split(':');
+                const reminderHour = parseInt(reminderTimeParts[0]);
+                const reminderMinute = parseInt(reminderTimeParts[1]);
                 
+                // Check if the reminder has been shown today
+                const lastReminder = localStorage.getItem('bpLastReminder');
+                const todayStr = now.toDateString();
+
                 if (now.getHours() === reminderHour && 
-                    now.getMinutes() >= reminderMinute && 
-                    now.getMinutes() < reminderMinute + 5) {
+                    now.getMinutes() === reminderMinute &&
+                    lastReminder !== todayStr) {
                     
                     const readings = getReadings();
-                    const today = new Date().toDateString();
                     const todayReadings = readings.filter(r => 
-                        new Date(r.timestamp).toDateString() === today
+                        new Date(r.timestamp).toDateString() === todayStr
                     );
                     
                     if (todayReadings.length === 0) {
-                        showToast("Don't forget to log your blood pressure today!");
+                        showToast("Reminder: Don't forget to log your blood pressure today!");
+                        localStorage.setItem('bpLastReminder', todayStr);
                     }
                 }
             }
@@ -1463,10 +1475,13 @@
             loadReminderSettings();
             updateSettingsInfo();
             
+            // Check for reminder every minute
             setInterval(checkReminder, 60000);
+            checkReminder(); // Also check on app load
         }
 
         initApp();
     </script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
