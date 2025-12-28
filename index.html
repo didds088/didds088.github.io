@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -121,7 +122,7 @@
             color: #6b7280;
         }
     </style>
-
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
     <!-- Header -->
@@ -1352,152 +1353,41 @@ async function generateAIIntelligence(readings) {
             e.target.value = '';
         });
 
-        // Helper function to parse CSV line properly (handles quoted fields with commas)
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current.trim());
-            
-            return result;
-        }
-
-        // Helper function to parse various date formats
-        function parseDateTime(dateStr, timeStr) {
-            // Try multiple date formats
-            let date = null;
-            
-            // Format: MM/DD/YYYY or M/D/YYYY
-            const usFormat = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (usFormat) {
-                const [, month, day, year] = usFormat;
-                date = new Date(year, month - 1, day);
-            }
-            
-            // Format: DD/MM/YYYY or D/M/YYYY
-            if (!date || isNaN(date.getTime())) {
-                const euFormat = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-                if (euFormat) {
-                    const [, day, month, year] = euFormat;
-                    date = new Date(year, month - 1, day);
-                }
-            }
-            
-            // Format: YYYY-MM-DD
-            if (!date || isNaN(date.getTime())) {
-                const isoFormat = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-                if (isoFormat) {
-                    const [, year, month, day] = isoFormat;
-                    date = new Date(year, month - 1, day);
-                }
-            }
-            
-            // Fallback to native parsing
-            if (!date || isNaN(date.getTime())) {
-                date = new Date(dateStr);
-            }
-            
-            if (!date || isNaN(date.getTime())) {
-                return null;
-            }
-            
-            // Parse time
-            const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
-            if (timeMatch) {
-                let [, hours, minutes, seconds, ampm] = timeMatch;
-                hours = parseInt(hours);
-                minutes = parseInt(minutes);
-                seconds = parseInt(seconds) || 0;
-                
-                if (ampm) {
-                    if (ampm.toUpperCase() === 'PM' && hours !== 12) {
-                        hours += 12;
-                    } else if (ampm.toUpperCase() === 'AM' && hours === 12) {
-                        hours = 0;
-                    }
-                }
-                
-                date.setHours(hours, minutes, seconds);
-            }
-            
-            return date;
-        }
-
         function importFromCSV(csvText) {
             try {
-                const lines = csvText.split('\n').filter(line => line.trim());
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
                 
-                if (lines.length < 2) {
-                    showToast('CSV file is empty or has no data rows');
-                    return;
-                }
+                const expectedHeaders = ['Date', 'Time', 'Systolic', 'Diastolic', 'Pulse', 'Status', 'Notes'];
+                const isValidFormat = expectedHeaders.every(h => headers.includes(h));
                 
-                const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
-                
-                // Find column indices (case-insensitive)
-                const dateIdx = headers.findIndex(h => h === 'date');
-                const timeIdx = headers.findIndex(h => h === 'time');
-                const systolicIdx = headers.findIndex(h => h === 'systolic');
-                const diastolicIdx = headers.findIndex(h => h === 'diastolic');
-                const pulseIdx = headers.findIndex(h => h === 'pulse');
-                const statusIdx = headers.findIndex(h => h === 'status');
-                const notesIdx = headers.findIndex(h => h === 'notes');
-                
-                // Check required columns exist
-                if (dateIdx === -1 || timeIdx === -1 || systolicIdx === -1 || diastolicIdx === -1 || pulseIdx === -1) {
-                    showToast('Invalid CSV format. Required columns: Date, Time, Systolic, Diastolic, Pulse');
+                if (!isValidFormat) {
+                    showToast('Invalid CSV format');
                     return;
                 }
                 
                 const newReadings = [];
-                let skippedRows = 0;
                 
                 for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
+                    if (!lines[i].trim()) continue;
                     
-                    const values = parseCSVLine(line);
+                    const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
                     
-                    const dateStr = values[dateIdx] || '';
-                    const timeStr = values[timeIdx] || '';
-                    const systolic = parseInt(values[systolicIdx]);
-                    const diastolic = parseInt(values[diastolicIdx]);
-                    const pulse = parseInt(values[pulseIdx]);
-                    const notes = notesIdx !== -1 ? (values[notesIdx] || '') : '';
+                    if (values.length < 6) continue;
                     
-                    // Validate numeric values
-                    if (isNaN(systolic) || isNaN(diastolic) || isNaN(pulse)) {
-                        skippedRows++;
-                        continue;
-                    }
+                    const dateStr = values[0];
+                    const timeStr = values[1];
+                    const systolic = parseInt(values[2]);
+                    const diastolic = parseInt(values[3]);
+                    const pulse = parseInt(values[4]);
+                    const status = values[5];
+                    const notes = values[6] || '';
                     
-                    // Validate ranges
-                    if (systolic < 50 || systolic > 300 || diastolic < 30 || diastolic > 200 || pulse < 30 || pulse > 200) {
-                        skippedRows++;
-                        continue;
-                    }
+                    if (isNaN(systolic) || isNaN(diastolic) || isNaN(pulse)) continue;
                     
-                    // Parse date and time
-                    const parsedDate = parseDateTime(dateStr, timeStr);
-                    if (!parsedDate) {
-                        skippedRows++;
-                        continue;
-                    }
+                    const timestamp = new Date(`${dateStr} ${timeStr}`).toISOString();
+                    if (isNaN(new Date(timestamp).getTime())) continue;
                     
-                    const timestamp = parsedDate.toISOString();
                     const evaluation = evaluateBP(systolic, diastolic);
                     
                     newReadings.push({
@@ -1513,7 +1403,7 @@ async function generateAIIntelligence(readings) {
                 }
                 
                 if (newReadings.length === 0) {
-                    showToast('No valid data found in CSV. Check date/time format and values.');
+                    showToast('No valid data found in CSV');
                     return;
                 }
                 
@@ -1523,17 +1413,12 @@ async function generateAIIntelligence(readings) {
                 allReadings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
                 saveReadings(allReadings);
-                
-                let message = `Imported ${newReadings.length} readings successfully`;
-                if (skippedRows > 0) {
-                    message += ` (${skippedRows} rows skipped)`;
-                }
-                showToast(message);
+                showToast(`Imported ${newReadings.length} readings successfully`);
                 
                 switchTab('history');
             } catch (error) {
                 console.error('Error importing CSV:', error);
-                showToast('Error importing CSV file: ' + error.message);
+                showToast('Error importing CSV file');
             }
         }
 
@@ -1699,6 +1584,6 @@ async function generateAIIntelligence(readings) {
 
         initApp();
     </script>
-
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
