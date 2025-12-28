@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -122,7 +121,7 @@
             color: #6b7280;
         }
     </style>
-<link rel="stylesheet" href="/index.css">
+
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
     <!-- Header -->
@@ -304,6 +303,19 @@
                 <div id="avg-30day-pulse" class="text-sm text-gray-500">-- BPM</div>
             </div>
         </div>
+        <!-- AI Insights will be dynamically generated here -->
+        <div class="ios-card bg-white p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">AI Health Analysis</h2>
+    <button id="ai-insights-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition-colors mb-4">
+        <i class="fas fa-robot mr-2"></i> Get AI-Powered Insights
+    </button>
+    <div id="ai-insights-content" class="hidden">
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <div id="ai-insights-text" class="text-sm text-gray-700"></div>
+            <div class="text-xs text-gray-500 mt-2">AI-generated insights - Always consult a doctor for medical advice</div>
+        </div>
+    </div>
+</div>
         
         <div class="ios-card bg-white p-6">
             <h2 class="text-lg font-semibold mb-4">Health Insights</h2>
@@ -523,6 +535,33 @@
             
             renderHistory();
         }
+        
+        // AI Insight
+        document.getElementById('ai-insights-btn')?.addEventListener('click', async function() {
+    const readings = getReadings();
+    if (readings.length === 0) {
+        showToast('No readings available for analysis');
+        return;
+    }
+    
+    const button = this;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Analyzing...';
+    button.disabled = true;
+    
+    const insights = await generateAIIntelligence(readings);
+    
+    if (insights) {
+        document.getElementById('ai-insights-text').textContent = insights;
+        document.getElementById('ai-insights-content').classList.remove('hidden');
+        showToast('AI analysis completed');
+    } else {
+        showToast('Failed to generate AI insights');
+    }
+    
+    button.innerHTML = originalText;
+    button.disabled = false;
+});
 
         function switchTab(tab) {
             // Hide all tabs
@@ -1088,6 +1127,68 @@
             });
         }
 
+// function to generate AI insights
+async function generateAIIntelligence(readings) {
+    if (readings.length === 0) return null;
+    
+    try {
+        // Prepare the data for the AI
+        const recentReadings = readings.slice(0, 14); // Last 14 readings
+        const readingSummary = recentReadings.map(r => ({
+            date: new Date(r.timestamp).toLocaleDateString(),
+            systolic: r.systolic,
+            diastolic: r.diastolic,
+            pulse: r.pulse,
+            status: r.status
+        }));
+
+        const prompt = `
+        As a medical AI assistant, analyze these blood pressure readings and provide:
+        1. Brief health insights
+        2. Patterns or trends noticed
+        3. General lifestyle suggestions
+        4. When to consult a doctor
+        
+        Readings: ${JSON.stringify(readingSummary)}
+        
+        Please provide concise, helpful advice in plain language. Do not provide medical diagnosis.
+        `;
+
+        const response = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer YOUR_DEEPSEEK_API_KEY`
+            },
+            body: JSON.stringify({
+                model: "deepseek-chat",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a helpful medical assistant that provides general health insights about blood pressure trends. Always remind users to consult healthcare professionals for medical advice."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                max_tokens: 500,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('API request failed');
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
+    } catch (error) {
+        console.error('AI Insight Error:', error);
+        return null;
+    }
+}
+
         // Generate Health Insights
         function generateHealthInsights(readings) {
             if (readings.length === 0) return;
@@ -1251,41 +1352,152 @@
             e.target.value = '';
         });
 
+        // Helper function to parse CSV line properly (handles quoted fields with commas)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            
+            return result;
+        }
+
+        // Helper function to parse various date formats
+        function parseDateTime(dateStr, timeStr) {
+            // Try multiple date formats
+            let date = null;
+            
+            // Format: MM/DD/YYYY or M/D/YYYY
+            const usFormat = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (usFormat) {
+                const [, month, day, year] = usFormat;
+                date = new Date(year, month - 1, day);
+            }
+            
+            // Format: DD/MM/YYYY or D/M/YYYY
+            if (!date || isNaN(date.getTime())) {
+                const euFormat = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                if (euFormat) {
+                    const [, day, month, year] = euFormat;
+                    date = new Date(year, month - 1, day);
+                }
+            }
+            
+            // Format: YYYY-MM-DD
+            if (!date || isNaN(date.getTime())) {
+                const isoFormat = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (isoFormat) {
+                    const [, year, month, day] = isoFormat;
+                    date = new Date(year, month - 1, day);
+                }
+            }
+            
+            // Fallback to native parsing
+            if (!date || isNaN(date.getTime())) {
+                date = new Date(dateStr);
+            }
+            
+            if (!date || isNaN(date.getTime())) {
+                return null;
+            }
+            
+            // Parse time
+            const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+            if (timeMatch) {
+                let [, hours, minutes, seconds, ampm] = timeMatch;
+                hours = parseInt(hours);
+                minutes = parseInt(minutes);
+                seconds = parseInt(seconds) || 0;
+                
+                if (ampm) {
+                    if (ampm.toUpperCase() === 'PM' && hours !== 12) {
+                        hours += 12;
+                    } else if (ampm.toUpperCase() === 'AM' && hours === 12) {
+                        hours = 0;
+                    }
+                }
+                
+                date.setHours(hours, minutes, seconds);
+            }
+            
+            return date;
+        }
+
         function importFromCSV(csvText) {
             try {
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+                const lines = csvText.split('\n').filter(line => line.trim());
                 
-                const expectedHeaders = ['Date', 'Time', 'Systolic', 'Diastolic', 'Pulse', 'Status', 'Notes'];
-                const isValidFormat = expectedHeaders.every(h => headers.includes(h));
+                if (lines.length < 2) {
+                    showToast('CSV file is empty or has no data rows');
+                    return;
+                }
                 
-                if (!isValidFormat) {
-                    showToast('Invalid CSV format');
+                const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
+                
+                // Find column indices (case-insensitive)
+                const dateIdx = headers.findIndex(h => h === 'date');
+                const timeIdx = headers.findIndex(h => h === 'time');
+                const systolicIdx = headers.findIndex(h => h === 'systolic');
+                const diastolicIdx = headers.findIndex(h => h === 'diastolic');
+                const pulseIdx = headers.findIndex(h => h === 'pulse');
+                const statusIdx = headers.findIndex(h => h === 'status');
+                const notesIdx = headers.findIndex(h => h === 'notes');
+                
+                // Check required columns exist
+                if (dateIdx === -1 || timeIdx === -1 || systolicIdx === -1 || diastolicIdx === -1 || pulseIdx === -1) {
+                    showToast('Invalid CSV format. Required columns: Date, Time, Systolic, Diastolic, Pulse');
                     return;
                 }
                 
                 const newReadings = [];
+                let skippedRows = 0;
                 
                 for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
+                    const line = lines[i].trim();
+                    if (!line) continue;
                     
-                    const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+                    const values = parseCSVLine(line);
                     
-                    if (values.length < 6) continue;
+                    const dateStr = values[dateIdx] || '';
+                    const timeStr = values[timeIdx] || '';
+                    const systolic = parseInt(values[systolicIdx]);
+                    const diastolic = parseInt(values[diastolicIdx]);
+                    const pulse = parseInt(values[pulseIdx]);
+                    const notes = notesIdx !== -1 ? (values[notesIdx] || '') : '';
                     
-                    const dateStr = values[0];
-                    const timeStr = values[1];
-                    const systolic = parseInt(values[2]);
-                    const diastolic = parseInt(values[3]);
-                    const pulse = parseInt(values[4]);
-                    const status = values[5];
-                    const notes = values[6] || '';
+                    // Validate numeric values
+                    if (isNaN(systolic) || isNaN(diastolic) || isNaN(pulse)) {
+                        skippedRows++;
+                        continue;
+                    }
                     
-                    if (isNaN(systolic) || isNaN(diastolic) || isNaN(pulse)) continue;
+                    // Validate ranges
+                    if (systolic < 50 || systolic > 300 || diastolic < 30 || diastolic > 200 || pulse < 30 || pulse > 200) {
+                        skippedRows++;
+                        continue;
+                    }
                     
-                    const timestamp = new Date(`${dateStr} ${timeStr}`).toISOString();
-                    if (isNaN(new Date(timestamp).getTime())) continue;
+                    // Parse date and time
+                    const parsedDate = parseDateTime(dateStr, timeStr);
+                    if (!parsedDate) {
+                        skippedRows++;
+                        continue;
+                    }
                     
+                    const timestamp = parsedDate.toISOString();
                     const evaluation = evaluateBP(systolic, diastolic);
                     
                     newReadings.push({
@@ -1301,7 +1513,7 @@
                 }
                 
                 if (newReadings.length === 0) {
-                    showToast('No valid data found in CSV');
+                    showToast('No valid data found in CSV. Check date/time format and values.');
                     return;
                 }
                 
@@ -1311,12 +1523,17 @@
                 allReadings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
                 saveReadings(allReadings);
-                showToast(`Imported ${newReadings.length} readings successfully`);
+                
+                let message = `Imported ${newReadings.length} readings successfully`;
+                if (skippedRows > 0) {
+                    message += ` (${skippedRows} rows skipped)`;
+                }
+                showToast(message);
                 
                 switchTab('history');
             } catch (error) {
                 console.error('Error importing CSV:', error);
-                showToast('Error importing CSV file');
+                showToast('Error importing CSV file: ' + error.message);
             }
         }
 
@@ -1377,7 +1594,7 @@
                     console.error('Error restoring data:', error);
                     showToast('Error restoring from backup');
                 }
-            }
+            } 
         });
 
         cancelBackupBtn.addEventListener('click', () => {
@@ -1482,6 +1699,6 @@
 
         initApp();
     </script>
-<script type="module" src="/index.tsx"></script>
+
 </body>
 </html>
