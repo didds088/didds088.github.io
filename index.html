@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -304,19 +305,6 @@
                 <div id="avg-30day-pulse" class="text-sm text-gray-500">-- BPM</div>
             </div>
         </div>
-        <!-- AI Insights will be dynamically generated here -->
-        <div class="ios-card bg-white p-6 mb-6">
-    <h2 class="text-lg font-semibold mb-4">AI Health Analysis</h2>
-    <button id="ai-insights-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition-colors mb-4">
-        <i class="fas fa-robot mr-2"></i> Get AI-Powered Insights
-    </button>
-    <div id="ai-insights-content" class="hidden">
-        <div class="bg-blue-50 p-4 rounded-lg">
-            <div id="ai-insights-text" class="text-sm text-gray-700"></div>
-            <div class="text-xs text-gray-500 mt-2">AI-generated insights - Always consult a doctor for medical advice</div>
-        </div>
-    </div>
-</div>
         
         <div class="ios-card bg-white p-6">
             <h2 class="text-lg font-semibold mb-4">Health Insights</h2>
@@ -348,41 +336,6 @@
                         <i class="fas fa-file-import mr-2"></i> Import from CSV
                     </button>
                 </div>
-                
-                <div class="pt-4 border-t">
-                    <h3 class="font-medium mb-2">Backup Data</h3>
-                    <p class="text-sm text-gray-600 mb-3">Create a backup of your data that you can restore later.</p>
-                    <div class="flex space-x-2">
-                        <button id="backup-data" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 rounded-lg transition-colors">
-                            <i class="fas fa-save mr-2"></i> Backup
-                        </button>
-                        <button id="restore-data" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 rounded-lg transition-colors">
-                            <i class="fas fa-undo mr-2"></i> Restore
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="ios-card bg-white p-6 mb-6">
-            <h2 class="text-lg font-semibold mb-4">Reminders</h2>
-            
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-medium">Daily Reminder</h3>
-                        <p class="text-sm text-gray-600">Get reminded to log your blood pressure</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="daily-reminder" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
-                
-                <div id="reminder-time-container" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Reminder Time</label>
-                    <input type="time" id="reminder-time" class="w-full p-3 border border-gray-300 rounded-lg">
-                </div>
             </div>
         </div>
         
@@ -413,22 +366,6 @@
             <div class="flex space-x-3">
                 <button id="cancel-clear" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
                 <button id="confirm-clear" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-medium">Clear All</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Backup/Restore Modal -->
-    <div id="backup-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="ios-card bg-white mx-4 p-6 w-full max-w-sm">
-            <h3 class="text-lg font-semibold mb-2" id="backup-modal-title">Backup Data</h3>
-            <p class="text-gray-600 mb-4" id="backup-modal-text">Your data will be saved to your device.</p>
-            <div class="mb-4 hidden" id="backup-textarea-container">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Backup Data</label>
-                <textarea id="backup-data-text" rows="4" class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
-            </div>
-            <div class="flex space-x-3">
-                <button id="cancel-backup" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
-                <button id="confirm-backup" class="flex-1 py-2 bg-blue-500 text-white rounded-lg font-medium">Confirm</button>
             </div>
         </div>
     </div>
@@ -475,24 +412,12 @@
         const exportCsvBtn = document.getElementById('export-csv');
         const importCsvBtn = document.getElementById('import-csv');
         const importFile = document.getElementById('import-file');
-        const backupDataBtn = document.getElementById('backup-data');
-        const restoreDataBtn = document.getElementById('restore-data');
-        const backupModal = document.getElementById('backup-modal');
-        const backupModalTitle = document.getElementById('backup-modal-title');
-        const backupModalText = document.getElementById('backup-modal-text');
-        const backupTextareaContainer = document.getElementById('backup-textarea-container');
-        const backupDataText = document.getElementById('backup-data-text');
-        const cancelBackupBtn = document.getElementById('cancel-backup');
-        const confirmBackupBtn = document.getElementById('confirm-backup');
-        const dailyReminder = document.getElementById('daily-reminder');
-        const reminderTimeContainer = document.getElementById('reminder-time-container');
-        const reminderTime = document.getElementById('reminder-time');
         const readingsCount = document.getElementById('readings-count');
         const lastUpdated = document.getElementById('last-updated');
 
         let bpChart = null;
-        let currentView = 'table'; // 'card', 'list', or 'table'
-        let showAllReadings = false; // Track if showing all readings or just last 7
+        let currentView = 'table'; 
+        let showAllReadings = false; 
 
         // Tab Navigation
         tabAdd.addEventListener('click', () => switchTab('add'));
@@ -518,10 +443,9 @@
 
         function switchView(view) {
             currentView = view;
-            showAllReadings = false; // Reset to show only last 7 when switching views
+            showAllReadings = false;
             viewMoreBtn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i> View More';
             
-            // Update button states
             viewCardBtn.classList.remove('active');
             viewListBtn.classList.remove('active');
             viewTableBtn.classList.remove('active');
@@ -536,42 +460,13 @@
             
             renderHistory();
         }
-        
-        // AI Insight
-        document.getElementById('ai-insights-btn')?.addEventListener('click', async function() {
-    const readings = getReadings();
-    if (readings.length === 0) {
-        showToast('No readings available for analysis');
-        return;
-    }
-    
-    const button = this;
-    const originalText = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Analyzing...';
-    button.disabled = true;
-    
-    const insights = await generateAIIntelligence(readings);
-    
-    if (insights) {
-        document.getElementById('ai-insights-text').textContent = insights;
-        document.getElementById('ai-insights-content').classList.remove('hidden');
-        showToast('AI analysis completed');
-    } else {
-        showToast('Failed to generate AI insights');
-    }
-    
-    button.innerHTML = originalText;
-    button.disabled = false;
-});
 
         function switchTab(tab) {
-            // Hide all tabs
             addTab.classList.add('hidden');
             historyTab.classList.add('hidden');
             statsTab.classList.add('hidden');
             settingsTab.classList.add('hidden');
             
-            // Remove active state from all tabs
             tabAdd.classList.remove('tab-active', 'text-blue-500');
             tabHistory.classList.remove('tab-active', 'text-blue-500');
             tabStats.classList.remove('tab-active', 'text-blue-500');
@@ -581,7 +476,6 @@
             tabStats.classList.add('text-gray-500');
             tabSettings.classList.add('text-gray-500');
             
-            // Show selected tab and set active state
             switch(tab) {
                 case 'add':
                     addTab.classList.remove('hidden');
@@ -592,7 +486,7 @@
                     historyTab.classList.remove('hidden');
                     tabHistory.classList.add('tab-active', 'text-blue-500');
                     tabHistory.classList.remove('text-gray-500');
-                    showAllReadings = false; // Reset when switching to history tab
+                    showAllReadings = false;
                     viewMoreBtn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i> View More';
                     renderHistory();
                     break;
@@ -611,7 +505,6 @@
             }
         }
 
-        // Blood Pressure Evaluation
         function evaluateBP(systolic, diastolic) {
             if (systolic < 90 || diastolic < 60) {
                 return { status: 'Low', class: 'status-low' };
@@ -626,7 +519,6 @@
             }
         }
 
-        // Update status preview in real-time
         systolicInput.addEventListener('input', updateStatusPreview);
         diastolicInput.addEventListener('input', updateStatusPreview);
 
@@ -642,7 +534,6 @@
             }
         }
 
-        // Storage Management
         function getReadings() {
             return JSON.parse(localStorage.getItem('bpReadings')) || [];
         }
@@ -653,16 +544,13 @@
             updateSettingsInfo();
         }
 
-        // Form Submission
         bpForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const systolic = parseInt(systolicInput.value);
             const diastolic = parseInt(diastolicInput.value);
             const pulse = parseInt(pulseInput.value);
             const notes = notesInput.value;
             const timestamp = new Date().toISOString();
-            
             const evaluation = evaluateBP(systolic, diastolic);
             
             const newReading = {
@@ -680,21 +568,14 @@
             readings.unshift(newReading);
             saveReadings(readings);
             
-            // Reset form
             bpForm.reset();
             statusPreview.textContent = 'Enter values to see status';
-            
-            // Show success message
             showToast('Reading saved successfully!');
-            
-            // Switch to history tab
             switchTab('history');
         });
 
-        // Render History
         function renderHistory() {
             const allReadings = getReadings();
-            
             if (allReadings.length === 0) {
                 emptyState.classList.remove('hidden');
                 horizontalHistory.classList.add('hidden');
@@ -705,11 +586,7 @@
             }
             
             emptyState.classList.add('hidden');
-            
-            // Determine how many readings to show
             const readingsToShow = showAllReadings ? allReadings : allReadings.slice(0, 7);
-            
-            // Show/hide "View More" button
             if (allReadings.length > 7) {
                 viewMoreContainer.classList.remove('hidden');
             } else {
@@ -734,65 +611,34 @@
             }
         }
 
-        // Render Table History (Grouped by Date in Rows)
         function renderTableHistory(readings) {
-            // Group readings by date
             const groupedReadings = {};
             readings.forEach(reading => {
                 const date = new Date(reading.timestamp).toDateString();
-                if (!groupedReadings[date]) {
-                    groupedReadings[date] = [];
-                }
+                if (!groupedReadings[date]) groupedReadings[date] = [];
                 groupedReadings[date].unshift(reading);
             });
             
-            // Generate table rows
             let html = '';
             Object.keys(groupedReadings).forEach(date => {
                 const dayReadings = groupedReadings[date];
-                
-                // Format date display
                 const today = new Date().toDateString();
                 const yesterday = new Date(Date.now() - 86400000).toDateString();
-                let displayDate = date;
+                let displayDate = (date === today) ? 'Today' : (date === yesterday) ? 'Yesterday' : new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
                 
-                if (date === today) {
-                    displayDate = 'Today';
-                } else if (date === yesterday) {
-                    displayDate = 'Yesterday';
-                } else {
-                    displayDate = new Date(date).toLocaleDateString('en-US', { 
-                        weekday: 'short',
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-                }
-                
-                // Calculate daily averages
                 const avgSystolic = Math.round(dayReadings.reduce((sum, r) => sum + r.systolic, 0) / dayReadings.length);
                 const avgDiastolic = Math.round(dayReadings.reduce((sum, r) => sum + r.diastolic, 0) / dayReadings.length);
-                const avgPulse = Math.round(dayReadings.reduce((sum, r) => sum + r.pulse, 0) / dayReadings.length);
-                
-                // Determine overall status for the day
                 const avgEvaluation = evaluateBP(avgSystolic, avgDiastolic);
                 
-                // Build readings cell with all readings for the day
                 let readingsCell = '<div class="reading-cell">';
                 dayReadings.forEach(reading => {
-                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                    });
-                    
+                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                     readingsCell += `
                         <div class="reading-item">
                             <span class="time-badge">${time}</span>
                             <span class="font-semibold">${reading.systolic}/${reading.diastolic}</span>
                             <span class="text-gray-500 text-xs">❤️ ${reading.pulse}</span>
-                        </div>
-                    `;
+                        </div>`;
                 });
                 readingsCell += '</div>';
                 
@@ -807,60 +653,33 @@
                         <td>
                             <span class="${avgEvaluation.class} px-2 py-1 rounded-full text-xs font-medium">${avgEvaluation.status}</span>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
-            
             tableBody.innerHTML = html;
         }
 
-        // Render Horizontal History (Grouped by Date)
         function renderHorizontalHistory(readings) {
-            // Group readings by date
             const groupedReadings = {};
             readings.forEach(reading => {
                 const date = new Date(reading.timestamp).toDateString();
-                if (!groupedReadings[date]) {
-                    groupedReadings[date] = [];
-                }
+                if (!groupedReadings[date]) groupedReadings[date] = [];
                 groupedReadings[date].push(reading);
             });
             
-            // Generate HTML for grouped readings
             let html = '';
             Object.keys(groupedReadings).forEach(date => {
                 const dayReadings = groupedReadings[date];
-                
-                // Format date display
                 const today = new Date().toDateString();
                 const yesterday = new Date(Date.now() - 86400000).toDateString();
-                let displayDate = date;
-                
-                if (date === today) {
-                    displayDate = 'Today';
-                } else if (date === yesterday) {
-                    displayDate = 'Yesterday';
-                } else {
-                    displayDate = new Date(date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-                }
+                let displayDate = (date === today) ? 'Today' : (date === yesterday) ? 'Yesterday' : new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 
                 html += `
                     <div class="date-group">
                         <h3 class="date-header">${displayDate}</h3>
-                        <div class="horizontal-scroll">
-                `;
+                        <div class="horizontal-scroll">`;
                 
                 dayReadings.forEach(reading => {
-                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                    });
-                    
+                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                     html += `
                         <div class="reading-card ios-card bg-white p-4">
                             <div class="text-center">
@@ -872,78 +691,41 @@
                                     <i class="fas fa-heartbeat mr-1"></i> ${reading.pulse} BPM
                                 </div>
                                 <div class="text-xs text-gray-400 mb-2">${time}</div>
-                                ${reading.notes ? `<div class="mt-2 text-xs text-gray-600 truncate">${reading.notes}</div>` : ''}
+                                ${reading.notes ? `<div class="mt-2 text-xs text-gray-600 truncate" title="${reading.notes}">${reading.notes}</div>` : ''}
                             </div>
                             <button class="delete-reading text-gray-400 hover:text-red-500 mt-2 mx-auto block" data-id="${reading.id}">
                                 <i class="fas fa-times"></i>
                             </button>
-                        </div>
-                    `;
+                        </div>`;
                 });
-                
-                html += `
-                        </div>
-                    </div>
-                `;
+                html += `</div></div>`;
             });
-            
             horizontalHistory.innerHTML = html;
-            
-            // Add event listeners to delete buttons
-            document.querySelectorAll('.delete-reading').forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    deleteReading(id);
-                });
-            });
+            attachDeleteListeners();
         }
 
-        // Render List History
         function renderListHistory(readings) {
-            // Group readings by date
             const groupedReadings = {};
             readings.forEach(reading => {
                 const date = new Date(reading.timestamp).toDateString();
-                if (!groupedReadings[date]) {
-                    groupedReadings[date] = [];
-                }
+                if (!groupedReadings[date]) groupedReadings[date] = [];
                 groupedReadings[date].push(reading);
             });
             
-            // Generate HTML for grouped readings
             let html = '';
             Object.keys(groupedReadings).forEach(date => {
                 const dayReadings = groupedReadings[date];
-                
-                // Format date display
                 const today = new Date().toDateString();
                 const yesterday = new Date(Date.now() - 86400000).toDateString();
-                let displayDate = date;
-                
-                if (date === today) {
-                    displayDate = 'Today';
-                } else if (date === yesterday) {
-                    displayDate = 'Yesterday';
-                } else {
-                    displayDate = new Date(date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric' 
-                    });
-                }
+                let displayDate = (date === today) ? 'Today' : (date === yesterday) ? 'Yesterday' : new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 
                 html += `
                     <div class="mb-6">
                         <h3 class="text-md font-semibold text-gray-700 mb-3 px-2">${displayDate}</h3>
-                        <div class="space-y-3">
-                `;
+                        <div class="space-y-3">`;
                 
                 dayReadings.forEach(reading => {
-                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                    });
-                    
+                    const time = new Date(reading.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                     html += `
                         <div class="ios-card bg-white p-4">
                             <div class="flex justify-between items-start">
@@ -962,45 +744,31 @@
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
-                
-                html += `
-                        </div>
-                    </div>
-                `;
+                html += `</div></div>`;
             });
-            
             historyContainer.innerHTML = html;
-            
-            // Add event listeners to delete buttons
+            attachDeleteListeners();
+        }
+
+        function attachDeleteListeners() {
             document.querySelectorAll('.delete-reading').forEach(button => {
                 button.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    deleteReading(id);
+                    deleteReading(parseInt(this.getAttribute('data-id')));
                 });
             });
         }
 
-        // Delete Single Reading
         function deleteReading(id) {
-            const readings = getReadings();
-            const filteredReadings = readings.filter(reading => reading.id !== id);
-            saveReadings(filteredReadings);
+            const readings = getReadings().filter(reading => reading.id !== id);
+            saveReadings(readings);
             renderHistory();
             showToast('Reading deleted');
         }
 
-        // Clear History
-        clearHistoryBtn.addEventListener('click', () => {
-            clearModal.classList.remove('hidden');
-        });
-
-        cancelClearBtn.addEventListener('click', () => {
-            clearModal.classList.add('hidden');
-        });
-
+        clearHistoryBtn.addEventListener('click', () => clearModal.classList.remove('hidden'));
+        cancelClearBtn.addEventListener('click', () => clearModal.classList.add('hidden'));
         confirmClearBtn.addEventListener('click', () => {
             saveReadings([]);
             renderHistory();
@@ -1008,26 +776,18 @@
             showToast('All history cleared');
         });
 
-        // Render Statistics
         function renderStatistics() {
             const readings = getReadings();
-            
             if (readings.length === 0) {
-                healthInsights.innerHTML = `
-                    <p class="text-gray-500">No data available. Add some readings to see statistics and insights.</p>
-                `;
+                healthInsights.innerHTML = `<p class="text-gray-500">No data available.</p>`;
                 avg7Day.textContent = '--/--';
                 avg7DayPulse.textContent = '-- BPM';
                 avg30Day.textContent = '--/--';
                 avg30DayPulse.textContent = '-- BPM';
-                
-                if (bpChart) {
-                    bpChart.destroy();
-                }
+                if (bpChart) bpChart.destroy();
                 return;
             }
             
-            // Calculate averages
             const now = new Date();
             const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -1035,270 +795,60 @@
             const readings7Days = readings.filter(r => new Date(r.timestamp) >= sevenDaysAgo);
             const readings30Days = readings.filter(r => new Date(r.timestamp) >= thirtyDaysAgo);
             
-            // Calculate 7-day averages
             if (readings7Days.length > 0) {
-                const avgSystolic7 = Math.round(readings7Days.reduce((sum, r) => sum + r.systolic, 0) / readings7Days.length);
-                const avgDiastolic7 = Math.round(readings7Days.reduce((sum, r) => sum + r.diastolic, 0) / readings7Days.length);
-                const avgPulse7 = Math.round(readings7Days.reduce((sum, r) => sum + r.pulse, 0) / readings7Days.length);
-                
-                avg7Day.textContent = `${avgSystolic7}/${avgDiastolic7}`;
-                avg7DayPulse.textContent = `${avgPulse7} BPM`;
-            } else {
-                avg7Day.textContent = '--/--';
-                avg7DayPulse.textContent = '-- BPM';
+                avg7Day.textContent = `${Math.round(readings7Days.reduce((sum, r) => sum + r.systolic, 0) / readings7Days.length)}/${Math.round(readings7Days.reduce((sum, r) => sum + r.diastolic, 0) / readings7Days.length)}`;
+                avg7DayPulse.textContent = `${Math.round(readings7Days.reduce((sum, r) => sum + r.pulse, 0) / readings7Days.length)} BPM`;
             }
-            
-            // Calculate 30-day averages
             if (readings30Days.length > 0) {
-                const avgSystolic30 = Math.round(readings30Days.reduce((sum, r) => sum + r.systolic, 0) / readings30Days.length);
-                const avgDiastolic30 = Math.round(readings30Days.reduce((sum, r) => sum + r.diastolic, 0) / readings30Days.length);
-                const avgPulse30 = Math.round(readings30Days.reduce((sum, r) => sum + r.pulse, 0) / readings30Days.length);
-                
-                avg30Day.textContent = `${avgSystolic30}/${avgDiastolic30}`;
-                avg30DayPulse.textContent = `${avgPulse30} BPM`;
-            } else {
-                avg30Day.textContent = '--/--';
-                avg30DayPulse.textContent = '-- BPM';
+                avg30Day.textContent = `${Math.round(readings30Days.reduce((sum, r) => sum + r.systolic, 0) / readings30Days.length)}/${Math.round(readings30Days.reduce((sum, r) => sum + r.diastolic, 0) / readings30Days.length)}`;
+                avg30DayPulse.textContent = `${Math.round(readings30Days.reduce((sum, r) => sum + r.pulse, 0) / readings30Days.length)} BPM`;
             }
             
-            // Generate health insights
             generateHealthInsights(readings);
-            
-            // Create chart
             createBPChart(readings);
         }
 
-        // Create Blood Pressure Chart
         function createBPChart(readings) {
-            // Use last 14 readings or all if less than 14
             const chartReadings = readings.slice(0, 14).reverse();
-            
-            const labels = chartReadings.map(r => {
-                const date = new Date(r.timestamp);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            
+            const labels = chartReadings.map(r => new Date(r.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
             const systolicData = chartReadings.map(r => r.systolic);
             const diastolicData = chartReadings.map(r => r.diastolic);
             
-            if (bpChart) {
-                bpChart.destroy();
-            }
-            
+            if (bpChart) bpChart.destroy();
             const ctx = bpChartCanvas.getContext('2d');
             bpChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: 'Systolic',
-                            data: systolicData,
-                            borderColor: '#FF3B30',
-                            backgroundColor: 'rgba(255, 59, 48, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Diastolic',
-                            data: diastolicData,
-                            borderColor: '#007AFF',
-                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }
+                        { label: 'Systolic', data: systolicData, borderColor: '#FF3B30', backgroundColor: 'rgba(255, 59, 48, 0.1)', tension: 0.4, fill: true },
+                        { label: 'Diastolic', data: diastolicData, borderColor: '#007AFF', backgroundColor: 'rgba(0, 122, 255, 0.1)', tension: 0.4, fill: true }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            suggestedMin: 60,
-                            suggestedMax: 180
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { suggestedMin: 60, suggestedMax: 180 } } }
             });
         }
 
-// function to generate AI insights
-async function generateAIIntelligence(readings) {
-    if (readings.length === 0) return null;
-    
-    try {
-        // Prepare the data for the AI
-        const recentReadings = readings.slice(0, 14); // Last 14 readings
-        const readingSummary = recentReadings.map(r => ({
-            date: new Date(r.timestamp).toLocaleDateString(),
-            systolic: r.systolic,
-            diastolic: r.diastolic,
-            pulse: r.pulse,
-            status: r.status
-        }));
-
-        const prompt = `
-        As a medical AI assistant, analyze these blood pressure readings and provide:
-        1. Brief health insights
-        2. Patterns or trends noticed
-        3. General lifestyle suggestions
-        4. When to consult a doctor
-        
-        Readings: ${JSON.stringify(readingSummary)}
-        
-        Please provide concise, helpful advice in plain language. Do not provide medical diagnosis.
-        `;
-
-        const response = await fetch('https://api.deepseek.com/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer YOUR_DEEPSEEK_API_KEY`
-            },
-            body: JSON.stringify({
-                model: "deepseek-chat",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a helpful medical assistant that provides general health insights about blood pressure trends. Always remind users to consult healthcare professionals for medical advice."
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                max_tokens: 500,
-                temperature: 0.7
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('API request failed');
-        }
-
-        const data = await response.json();
-        return data.choices[0].message.content;
-    } catch (error) {
-        console.error('AI Insight Error:', error);
-        return null;
-    }
-}
-
-        // Generate Health Insights
         function generateHealthInsights(readings) {
-            if (readings.length === 0) return;
-            
             const recentReadings = readings.slice(0, 7);
             const goodReadings = recentReadings.filter(r => r.status === 'Good').length;
-            const elevatedReadings = recentReadings.filter(r => r.status === 'Elevated').length;
             const highReadings = recentReadings.filter(r => r.status === 'High').length;
             
             let insightsHTML = '';
-            
             if (goodReadings >= 5) {
-                insightsHTML += `
-                    <div class="flex items-start mb-3">
-                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                        <div>
-                            <p class="font-medium insight-positive">Excellent blood pressure control</p>
-                            <p class="text-sm text-gray-600">Most of your recent readings are in the healthy range.</p>
-                        </div>
-                    </div>
-                `;
+                insightsHTML += `<div class="flex items-start mb-3"><i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i><div><p class="font-medium insight-positive">Excellent blood pressure control</p><p class="text-sm text-gray-600">Most recent readings are healthy.</p></div></div>`;
             } else if (highReadings >= 3) {
-                insightsHTML += `
-                    <div class="flex items-start mb-3">
-                        <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-2"></i>
-                        <div>
-                            <p class="font-medium insight-critical">Consistently high readings</p>
-                            <p class="text-sm text-gray-600">Consider consulting with a healthcare provider about your blood pressure.</p>
-                        </div>
-                    </div>
-                `;
-            } else if (elevatedReadings >= 3) {
-                insightsHTML += `
-                    <div class="flex items-start mb-3">
-                        <i class="fas fa-exclamation-circle text-yellow-500 mt-1 mr-2"></i>
-                        <div>
-                            <p class="font-medium insight-warning">Elevated readings detected</p>
-                            <p class="text-sm text-gray-600">Monitor your blood pressure closely and consider lifestyle changes.</p>
-                        </div>
-                    </div>
-                `;
+                insightsHTML += `<div class="flex items-start mb-3"><i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-2"></i><div><p class="font-medium insight-critical">High readings detected</p><p class="text-sm text-gray-600">Consult a healthcare provider.</p></div></div>`;
             }
-            
-            const morningReadings = recentReadings.filter(r => {
-                const hour = new Date(r.timestamp).getHours();
-                return hour >= 6 && hour < 12;
-            });
-            
-            const eveningReadings = recentReadings.filter(r => {
-                const hour = new Date(r.timestamp).getHours();
-                return hour >= 18 && hour < 24;
-            });
-            
-            if (morningReadings.length >= 2 && eveningReadings.length >= 2) {
-                const morningAvgSystolic = Math.round(morningReadings.reduce((sum, r) => sum + r.systolic, 0) / morningReadings.length);
-                const eveningAvgSystolic = Math.round(eveningReadings.reduce((sum, r) => sum + r.systolic, 0) / eveningReadings.length);
-                
-                if (morningAvgSystolic > eveningAvgSystolic + 10) {
-                    insightsHTML += `
-                        <div class="flex items-start mb-3">
-                            <i class="fas fa-sun text-yellow-500 mt-1 mr-2"></i>
-                            <div>
-                                <p class="font-medium insight-warning">Higher morning readings</p>
-                                <p class="text-sm text-gray-600">Your blood pressure tends to be higher in the morning. This is common but worth monitoring.</p>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-            
-            if (recentReadings.length > 0) {
-                const avgPulse = Math.round(recentReadings.reduce((sum, r) => sum + r.pulse, 0) / recentReadings.length);
-                if (avgPulse > 100) {
-                    insightsHTML += `
-                        <div class="flex items-start mb-3">
-                            <i class="fas fa-heartbeat text-red-500 mt-1 mr-2"></i>
-                            <div>
-                                <p class="font-medium insight-critical">Elevated pulse rate</p>
-                                <p class="text-sm text-gray-600">Your average pulse is higher than normal. Consider stress reduction techniques.</p>
-                            </div>
-                        </div>
-                    `;
-                } else if (avgPulse < 60) {
-                    insightsHTML += `
-                        <div class="flex items-start mb-3">
-                            <i class="fas fa-heartbeat text-blue-500 mt-1 mr-2"></i>
-                            <div>
-                                <p class="font-medium">Low pulse rate</p>
-                                <p class="text-sm text-gray-600">Your pulse is lower than average, which can be normal for athletes.</p>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-            
-            if (insightsHTML === '') {
-                insightsHTML = `
-                    <div class="flex items-start mb-3">
-                        <i class="fas fa-lightbulb text-blue-500 mt-1 mr-2"></i>
-                        <div>
-                            <p class="font-medium">Keep tracking regularly</p>
-                            <p class="text-sm text-gray-600">Consistent monitoring helps identify patterns and trends in your blood pressure.</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
+            if (insightsHTML === '') insightsHTML = `<div class="flex items-start mb-3"><i class="fas fa-lightbulb text-blue-500 mt-1 mr-2"></i><div><p class="font-medium">Keep tracking regularly</p><p class="text-sm text-gray-600">Monitoring helps identify trends.</p></div></div>`;
             healthInsights.innerHTML = insightsHTML;
         }
+
+        /* 
+        =================================================================================
+        FIXED ROBUST CSV EXPORT AND IMPORT FUNCTIONS
+        =================================================================================
+        */
 
         // Export Data as CSV
         exportCsvBtn.addEventListener('click', exportToCSV);
@@ -1311,6 +861,18 @@ async function generateAIIntelligence(readings) {
                 return;
             }
             
+            // Function to escape fields containing commas, quotes, or line breaks
+            const escapeCSV = (val) => {
+                if (val === null || val === undefined) return '';
+                let str = String(val);
+                // According to RFC 4180: If field contains commas, double quotes, or line breaks, 
+                // wrap it in quotes and escape any internal double quotes by doubling them.
+                if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+                    str = '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            };
+
             let csv = 'Date,Time,Systolic,Diastolic,Pulse,Status,Notes\n';
             
             readings.forEach(reading => {
@@ -1318,10 +880,19 @@ async function generateAIIntelligence(readings) {
                 const dateStr = date.toLocaleDateString();
                 const timeStr = date.toLocaleTimeString();
                 
-                csv += `"${dateStr}","${timeStr}",${reading.systolic},${reading.diastolic},${reading.pulse},"${reading.status}","${reading.notes || ''}"\n`;
+                const row = [
+                    escapeCSV(dateStr),
+                    escapeCSV(timeStr),
+                    reading.systolic,
+                    reading.diastolic,
+                    reading.pulse,
+                    escapeCSV(reading.status),
+                    escapeCSV(reading.notes || '')
+                ];
+                csv += row.join(',') + '\n';
             });
             
-            const blob = new Blob([csv], { type: 'text/csv' });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1335,67 +906,114 @@ async function generateAIIntelligence(readings) {
         }
 
         // Import Data from CSV
-        importCsvBtn.addEventListener('click', () => {
-            importFile.click();
-        });
+        importCsvBtn.addEventListener('click', () => importFile.click());
 
         importFile.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const csv = e.target.result;
-                importFromCSV(csv);
-            };
+            reader.onload = (ev) => importFromCSV(ev.target.result);
             reader.readAsText(file);
-            
             e.target.value = '';
         });
 
+        // Robust CSV Parser (State-Machine Style)
+        function parseCSV(text) {
+            const rows = [];
+            let i = 0;
+            const len = text.length;
+
+            while (i < len) {
+                const row = [];
+                while (i < len) {
+                    let field = "";
+                    if (text[i] === '"') {
+                        // Quoted field
+                        i++; // skip opening quote
+                        while (i < len) {
+                            if (text[i] === '"' && text[i+1] === '"') {
+                                field += '"'; // escaped quote
+                                i += 2;
+                            } else if (text[i] === '"') {
+                                i++; // closing quote
+                                break;
+                            } else {
+                                field += text[i++];
+                            }
+                        }
+                    } else {
+                        // Unquoted field
+                        while (i < len && text[i] !== ',' && text[i] !== '\n' && text[i] !== '\r') {
+                            field += text[i++];
+                        }
+                        field = field.trim();
+                    }
+                    row.push(field);
+                    if (i < len && text[i] === ',') {
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
+                if (row.length > 0) rows.push(row);
+                // Move index past newline sequences
+                while (i < len && (text[i] === '\n' || text[i] === '\r')) i++;
+            }
+            return rows;
+        }
+
         function importFromCSV(csvText) {
             try {
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-                
+                const allRows = parseCSV(csvText);
+                if (allRows.length < 2) {
+                    showToast('CSV is empty or invalid');
+                    return;
+                }
+
+                const headers = allRows[0];
                 const expectedHeaders = ['Date', 'Time', 'Systolic', 'Diastolic', 'Pulse', 'Status', 'Notes'];
-                const isValidFormat = expectedHeaders.every(h => headers.includes(h));
                 
-                if (!isValidFormat) {
-                    showToast('Invalid CSV format');
+                // Map header index to expected fields (case-insensitive matching)
+                const headerMap = {};
+                expectedHeaders.forEach(h => {
+                    headerMap[h] = headers.findIndex(header => header.trim().toLowerCase() === h.toLowerCase());
+                });
+
+                // Check for core required fields
+                if (headerMap['Systolic'] === -1 || headerMap['Diastolic'] === -1 || headerMap['Date'] === -1) {
+                    showToast('Invalid CSV format: Missing required columns');
                     return;
                 }
                 
                 const newReadings = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
+                for (let i = 1; i < allRows.length; i++) {
+                    const values = allRows[i];
+                    if (values.length < 3) continue;
                     
-                    const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+                    const dateStr = values[headerMap['Date']];
+                    const timeStr = headerMap['Time'] !== -1 ? values[headerMap['Time']] : '';
+                    const systolic = parseInt(values[headerMap['Systolic']]);
+                    const diastolic = parseInt(values[headerMap['Diastolic']]);
+                    const pulse = headerMap['Pulse'] !== -1 ? parseInt(values[headerMap['Pulse']]) : 70;
+                    const notes = headerMap['Notes'] !== -1 ? values[headerMap['Notes']] : '';
                     
-                    if (values.length < 6) continue;
+                    if (isNaN(systolic) || isNaN(diastolic)) continue;
                     
-                    const dateStr = values[0];
-                    const timeStr = values[1];
-                    const systolic = parseInt(values[2]);
-                    const diastolic = parseInt(values[3]);
-                    const pulse = parseInt(values[4]);
-                    const status = values[5];
-                    const notes = values[6] || '';
-                    
-                    if (isNaN(systolic) || isNaN(diastolic) || isNaN(pulse)) continue;
-                    
-                    const timestamp = new Date(`${dateStr} ${timeStr}`).toISOString();
-                    if (isNaN(new Date(timestamp).getTime())) continue;
+                    let timestamp;
+                    try {
+                        const dateObj = new Date(dateStr + (timeStr ? ' ' + timeStr : ''));
+                        timestamp = isNaN(dateObj.getTime()) ? new Date().toISOString() : dateObj.toISOString();
+                    } catch(e) {
+                        timestamp = new Date().toISOString();
+                    }
                     
                     const evaluation = evaluateBP(systolic, diastolic);
-                    
                     newReadings.push({
                         id: Date.now() + i,
                         systolic,
                         diastolic,
-                        pulse,
-                        notes,
+                        pulse: isNaN(pulse) ? 70 : pulse,
+                        notes: notes || '',
                         timestamp,
                         status: evaluation.status,
                         statusClass: evaluation.class
@@ -1403,183 +1021,43 @@ async function generateAIIntelligence(readings) {
                 }
                 
                 if (newReadings.length === 0) {
-                    showToast('No valid data found in CSV');
+                    showToast('No valid readings found in CSV');
                     return;
                 }
                 
-                const existingReadings = getReadings();
-                const allReadings = [...newReadings, ...existingReadings];
-                
+                const allReadings = [...newReadings, ...getReadings()];
                 allReadings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
                 saveReadings(allReadings);
-                showToast(`Imported ${newReadings.length} readings successfully`);
                 
+                showToast(`Imported ${newReadings.length} readings successfully`);
                 switchTab('history');
             } catch (error) {
                 console.error('Error importing CSV:', error);
-                showToast('Error importing CSV file');
+                showToast('Error parsing CSV file');
             }
         }
 
-        // Backup Data
-        backupDataBtn.addEventListener('click', () => {
-            const readings = getReadings();
-            if (readings.length === 0) {
-                showToast('No data to backup');
-                return;
-            }
-            
-            const backupData = JSON.stringify(readings);
-            backupDataText.value = backupData;
-            backupTextareaContainer.classList.remove('hidden');
-            backupModalTitle.textContent = 'Backup Data';
-            backupModalText.textContent = 'Copy this backup code to a safe place:';
-            confirmBackupBtn.textContent = 'Copy';
-            backupModal.classList.remove('hidden');
-        });
-
-        restoreDataBtn.addEventListener('click', () => {
-            backupDataText.value = '';
-            backupTextareaContainer.classList.remove('hidden');
-            backupModalTitle.textContent = 'Restore Data';
-            backupModalText.textContent = 'Paste your backup code here:';
-            confirmBackupBtn.textContent = 'Restore';
-            backupModal.classList.remove('hidden');
-        });
-
-        confirmBackupBtn.addEventListener('click', () => {
-            if (confirmBackupBtn.textContent === 'Copy') {
-                backupDataText.select();
-                document.execCommand('copy');
-                showToast('Backup data copied to clipboard');
-                backupModal.classList.add('hidden');
-            } else {
-                try {
-                    const backupData = backupDataText.value.trim();
-                    if (!backupData) {
-                        showToast('Please enter backup data');
-                        return;
-                    }
-                    
-                    const restoredReadings = JSON.parse(backupData);
-                    
-                    if (!Array.isArray(restoredReadings) || 
-                        !restoredReadings.every(r => 
-                            r.systolic && r.diastolic && r.pulse && r.timestamp)) {
-                        throw new Error('Invalid backup data format');
-                    }
-                    
-                    saveReadings(restoredReadings);
-                    showToast('Data restored successfully');
-                    backupModal.classList.add('hidden');
-                    
-                    switchTab('history');
-                } catch (error) {
-                    console.error('Error restoring data:', error);
-                    showToast('Error restoring from backup');
-                }
-            } 
-        });
-
-        cancelBackupBtn.addEventListener('click', () => {
-            backupModal.classList.add('hidden');
-        });
-
-        // Reminder Settings
-        dailyReminder.addEventListener('change', function() {
-            if (this.checked) {
-                reminderTimeContainer.classList.remove('hidden');
-                if (!reminderTime.value) {
-                    reminderTime.value = '08:00';
-                }
-                saveReminderSettings();
-                showToast('Daily reminder enabled');
-            } else {
-                reminderTimeContainer.classList.add('hidden');
-                saveReminderSettings();
-                showToast('Daily reminder disabled');
-            }
-        });
-
-        reminderTime.addEventListener('change', saveReminderSettings);
-
-        function saveReminderSettings() {
-            const settings = {
-                dailyReminder: dailyReminder.checked,
-                reminderTime: reminderTime.value
-            };
-            localStorage.setItem('bpReminderSettings', JSON.stringify(settings));
-        }
-
-        function loadReminderSettings() {
-            const settings = JSON.parse(localStorage.getItem('bpReminderSettings') || '{}');
-            dailyReminder.checked = settings.dailyReminder || false;
-            reminderTime.value = settings.reminderTime || '08:00';
-            
-            if (dailyReminder.checked) {
-                reminderTimeContainer.classList.remove('hidden');
-            } else {
-                reminderTimeContainer.classList.add('hidden');
-            }
-        }
+        /* 
+        =================================================================================
+        END FIXED FUNCTIONS
+        =================================================================================
+        */
 
         function updateSettingsInfo() {
             const readings = getReadings();
             readingsCount.textContent = readings.length;
-            
-            const lastUpdatedTime = localStorage.getItem('bpLastUpdated');
-            lastUpdated.textContent = lastUpdatedTime || 'Never';
+            lastUpdated.textContent = localStorage.getItem('bpLastUpdated') || 'Never';
         }
 
         function showToast(message) {
             toast.textContent = message;
             toast.classList.remove('hidden');
-            toast.classList.add('fade-in');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('fade-in');
-            }, 3000);
-        }
-
-        function checkReminder() {
-            const settings = JSON.parse(localStorage.getItem('bpReminderSettings') || '{}');
-            if (settings.dailyReminder) {
-                const now = new Date();
-                const reminderTimeParts = settings.reminderTime.split(':');
-                const reminderHour = parseInt(reminderTimeParts[0]);
-                const reminderMinute = parseInt(reminderTimeParts[1]);
-                
-                // Check if the reminder has been shown today
-                const lastReminder = localStorage.getItem('bpLastReminder');
-                const todayStr = now.toDateString();
-
-                if (now.getHours() === reminderHour && 
-                    now.getMinutes() === reminderMinute &&
-                    lastReminder !== todayStr) {
-                    
-                    const readings = getReadings();
-                    const todayReadings = readings.filter(r => 
-                        new Date(r.timestamp).toDateString() === todayStr
-                    );
-                    
-                    if (todayReadings.length === 0) {
-                        showToast("Reminder: Don't forget to log your blood pressure today!");
-                        localStorage.setItem('bpLastReminder', todayStr);
-                    }
-                }
-            }
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
         function initApp() {
             renderHistory();
-            loadReminderSettings();
             updateSettingsInfo();
-            
-            // Check for reminder every minute
-            setInterval(checkReminder, 60000);
-            checkReminder(); // Also check on app load
         }
 
         initApp();
